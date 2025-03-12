@@ -5,14 +5,22 @@ using Microsoft.OpenApi.Models;
 using EnterpriseApiIntegration.Api.Authentication;
 using EnterpriseApiIntegration.Application;
 using EnterpriseApiIntegration.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add TimeProvider
+builder.Services.AddSingleton(TimeProvider.System);
 
 // Configure authentication based on environment
 if (builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>("UseDevAuthentication"))
 {
+    builder.Services.Configure<DevAuthOptions>(builder.Configuration.GetSection("DevAuth"));
     builder.Services.AddAuthentication("DevAuth")
-        .AddScheme<AuthenticationSchemeOptions, DevAuthHandler>("DevAuth", null);
+        .AddScheme<DevAuthOptions, DevAuthHandler>("DevAuth", options => 
+        {
+            builder.Configuration.GetSection("DevAuth").Bind(options);
+        });
 }
 else
 {
