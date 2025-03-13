@@ -20,5 +20,4 @@ RUN dotnet publish "EnterpriseApiIntegration.Api.csproj" -c Release -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-USER app
 ENTRYPOINT ["dotnet", "EnterpriseApiIntegration.Api.dll"] 
