@@ -5,6 +5,7 @@ using EnterpriseApiIntegration.Domain.Entities.Auth;
 using EnterpriseApiIntegration.Domain.Settings;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Logging;
 
 namespace EnterpriseApiIntegration.Infrastructure.Services;
 

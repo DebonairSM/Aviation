@@ -1,9 +1,11 @@
 using System.Security.Cryptography;
 using EnterpriseApiIntegration.Domain.Entities.Auth;
 using EnterpriseApiIntegration.Domain.Settings;
+using EnterpriseApiIntegration.Domain.Interfaces;
 using EnterpriseApiIntegration.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace EnterpriseApiIntegration.Infrastructure.Services;
 
@@ -71,7 +73,7 @@ public class AuthService : IAuthService
 
         // Revoke the old refresh token
         token.RevokedDate = DateTime.UtcNow;
-        token.ReplacedByToken = await GenerateReshTokenAsync(user.Id, "127.0.0.1"); // Replace with actual IP
+        token.ReplacedByToken = await GenerateRefreshTokenAsync(user.Id, "127.0.0.1"); // Replace with actual IP
 
         await _context.SaveChangesAsync();
 
@@ -98,7 +100,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> ValidateTokenAsync(string token)
     {
-        return _jwtTokenService.ValidateToken(token);
+        return await Task.FromResult(_jwtTokenService.ValidateToken(token));
     }
 
     public async Task<User?> GetUserByEmailAsync(string email)

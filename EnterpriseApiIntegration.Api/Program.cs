@@ -24,9 +24,9 @@ if (builder.Environment.IsDevelopment() && builder.Configuration.GetValue<bool>(
 }
 else
 {
-    // Add Azure AD Authentication
+    // Add Microsoft Entra ID Authentication
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+        .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("MicrosoftEntraId"))
             .EnableTokenAcquisitionToCallDownstreamApi()
             .AddInMemoryTokenCaches();
 }
@@ -61,11 +61,11 @@ builder.Services.AddSwaggerGen(c =>
             {
                 Implicit = new OpenApiOAuthFlow
                 {
-                    AuthorizationUrl = new Uri($"https://login.microsoftonline.com/{builder.Configuration["AzureAd:TenantId"]}/oauth2/v2.0/authorize"),
-                    TokenUrl = new Uri($"https://login.microsoftonline.com/{builder.Configuration["AzureAd:TenantId"]}/oauth2/v2.0/token"),
+                    AuthorizationUrl = new Uri($"{builder.Configuration["MicrosoftEntraId:Instance"]}{builder.Configuration["MicrosoftEntraId:TenantId"]}/oauth2/v2.0/authorize"),
+                    TokenUrl = new Uri($"{builder.Configuration["MicrosoftEntraId:Instance"]}{builder.Configuration["MicrosoftEntraId:TenantId"]}/oauth2/v2.0/token"),
                     Scopes = new Dictionary<string, string>
                     {
-                        { "api://your-client-id/access_as_user", "Access API as user" }
+                        { $"api://{builder.Configuration["MicrosoftEntraId:ClientId"]}/access_as_user", "Access API as user" }
                     }
                 }
             }
@@ -77,7 +77,7 @@ builder.Services.AddSwaggerGen(c =>
                 {
                     Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "oauth2" }
                 },
-                new[] { "api://your-client-id/access_as_user" }
+                new[] { $"api://{builder.Configuration["MicrosoftEntraId:ClientId"]}/access_as_user" }
             }
         });
     }
@@ -96,8 +96,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Enterprise API Integration v1");
-        c.OAuthClientId(builder.Configuration["AzureAd:ClientId"]);
-        c.OAuthScopes("api://your-client-id/access_as_user");
+        c.OAuthClientId(builder.Configuration["MicrosoftEntraId:ClientId"]);
+        c.OAuthScopes($"api://{builder.Configuration["MicrosoftEntraId:ClientId"]}/access_as_user");
     });
 }
 

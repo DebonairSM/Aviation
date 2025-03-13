@@ -31,7 +31,7 @@ This solution follows Clean Architecture principles with:
 
 ### 1. Clone the Repository
 
-```bash
+```powershell
 git clone https://github.com/DebonairSM/Aviation.git
 cd Aviation
 ```
@@ -40,12 +40,70 @@ cd Aviation
 
 For HTTPS development, you'll need to create a development certificate:
 
-```bash
+```powershell
 dotnet dev-certs https --clean
 dotnet dev-certs https --trust
 ```
 
 ### 3. Configuration
+
+#### Azure Key Vault Setup
+
+The project uses Azure Key Vault to securely store sensitive configuration values. The following secrets are required:
+
+1. **JWT Settings**
+   - Name: `JwtSettings--SecretKey`
+   - Purpose: Secret key for JWT token generation and validation
+   - Value: A secure random string (minimum 16 characters)
+
+2. **Microsoft Entra ID Settings**
+   - Name: `MicrosoftEntraId--ClientSecret`
+   - Purpose: Client secret for Microsoft Entra ID authentication
+   - Value: The client secret from your Microsoft Entra ID application registration
+
+To set up Azure Key Vault:
+
+1. Create the Key Vault:
+```powershell
+az keyvault create --name vsol-aviation-kv --resource-group aviation-rg --location eastus --enabled-for-deployment --enabled-for-disk-encryption --enabled-for-template-deployment --sku standard
+```
+
+2. Assign necessary roles:
+```powershell
+# Get your user's object ID
+az ad signed-in-user show --query id -o tsv
+
+# Assign Key Vault Secrets Officer role
+az role assignment create --role "Key Vault Secrets Officer" --assignee "YOUR_OBJECT_ID" --scope "/subscriptions/YOUR_SUBSCRIPTION_ID/resourceGroups/aviation-rg/providers/Microsoft.KeyVault/vaults/vsol-aviation-kv"
+```
+
+3. Store secrets:
+```powershell
+# Store JWT secret key
+az keyvault secret set --vault-name vsol-aviation-kv --name "JwtSettings--SecretKey" --value "SuperSecretJWTKey_2025!@#"
+
+# Store Microsoft Entra ID client secret
+az keyvault secret set --vault-name vsol-aviation-kv --name "MicrosoftEntraId--ClientSecret" --value "M3tr1c4ClientSecret_2025$"
+```
+
+4. Verify stored secrets:
+```powershell
+# List all secrets in the Key Vault
+az keyvault secret list --vault-name vsol-aviation-kv --output table
+```
+
+The application is configured to use these secrets through Key Vault references in `appsettings.json`:
+
+```json
+{
+  "JwtSettings": {
+    "SecretKey": "@Microsoft.KeyVault(SecretUri=https://vsol-aviation-kv.vault.azure.net/secrets/JwtSettings--SecretKey/)"
+  },
+  "MicrosoftEntraId": {
+    "ClientSecret": "@Microsoft.KeyVault(SecretUri=https://vsol-aviation-kv.vault.azure.net/secrets/MicrosoftEntraId--ClientSecret/)"
+  }
+}
+```
 
 #### Development Authentication
 
@@ -89,7 +147,7 @@ You can set these in:
 
 #### Using Docker
 
-```bash
+```powershell
 docker-compose up --build
 ```
 
@@ -105,7 +163,7 @@ The API will be available at:
 
 #### Using .NET CLI
 
-```bash
+```powershell
 cd EnterpriseApiIntegration.Api
 dotnet run
 ```
@@ -180,7 +238,7 @@ For production deployment, update the authentication configuration to use Azure 
 
 ## Testing
 
-```bash
+```powershell
 dotnet test
 ```
 
