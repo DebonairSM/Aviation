@@ -10,6 +10,7 @@ on:
 env:
   DOTNET_VERSION: '8.0.x'
   AZURE_WEBAPP_PACKAGE_PATH: '.'
+  SOLUTION_FILE: 'EnterpriseApiIntegration.sln'
 
 jobs:
   build-and-deploy:
