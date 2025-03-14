@@ -3,8 +3,8 @@ version: '3.8'
 services:
   api:
     build:
-      context: ./EnterpriseApiIntegration.Api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: EnterpriseApiIntegration.Api/Dockerfile
       args:
         ASPNETCORE_ENVIRONMENT: Development
         ASPNETCORE_URLS: https://+:443;http://+:80
@@ -46,6 +46,81 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: AzureMicroservicesPlatform.ApiGateway/Dockerfile
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    depends_on:
+      customers-service:
+        condition: service_started
+      aircraft-service:
+        condition: service_started
+      subscriptions-service:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  customers-service:
+    build:
+      context: .
+      dockerfile: AzureMicroservicesPlatform.Services.Customers/Dockerfile
+    ports:
+      - "5001:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    depends_on:
+      infrastructure:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  aircraft-service:
+    build:
+      context: .
+      dockerfile: AzureMicroservicesPlatform.Services.Aircraft/Dockerfile
+    ports:
+      - "5002:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    depends_on:
+      infrastructure:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  subscriptions-service:
+    build:
+      context: .
+      dockerfile: AzureMicroservicesPlatform.Services.Subscriptions/Dockerfile
+    ports:
+      - "5003:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    depends_on:
+      infrastructure:
+        condition: service_started
+      db:
+        condition: service_healthy
+
+  infrastructure:
+    build:
+      context: .
+      dockerfile: AzureMicroservicesPlatform.Infrastructure/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    depends_on:
+      db:
+        condition: service_healthy
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest

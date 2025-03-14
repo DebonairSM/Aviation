@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EnterpriseApiIntegration.Domain\EnterpriseApiIntegration.Domain.csproj" />
-    <ProjectReference Include="..\EnterpriseApiIntegration.Infrastructure\EnterpriseApiIntegration.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

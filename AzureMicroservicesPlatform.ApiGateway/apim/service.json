@@ -1,0 +1,90 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Azure Microservices Platform API",
+    "version": "1.0.0",
+    "description": "API Gateway for Azure Microservices Platform"
+  },
+  "host": "localhost:5000",
+  "basePath": "/",
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "paths": {
+    "/api/v1/customers/{everything}": {
+      "get": {
+        "tags": ["Customers"],
+        "summary": "Get customer information",
+        "parameters": [
+          {
+            "name": "everything",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Customers"],
+        "summary": "Create a new customer",
+        "parameters": [
+          {
+            "name": "everything",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Customer created successfully"
+          }
+        }
+      }
+    },
+    "/api/v1/aircraft/{everything}": {
+      "get": {
+        "tags": ["Aircraft"],
+        "summary": "Get aircraft information",
+        "parameters": [
+          {
+            "name": "everything",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    },
+    "/api/v1/subscriptions/{everything}": {
+      "get": {
+        "tags": ["Subscriptions"],
+        "summary": "Get subscription information",
+        "parameters": [
+          {
+            "name": "everything",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          }
+        }
+      }
+    }
+  }
+} 

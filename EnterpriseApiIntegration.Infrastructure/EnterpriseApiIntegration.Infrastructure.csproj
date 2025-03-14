@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EnterpriseApiIntegration.Domain\EnterpriseApiIntegration.Domain.csproj" />
+    <ProjectReference Include="..\EnterpriseApiIntegration.Application\EnterpriseApiIntegration.Application.csproj" />
   </ItemGroup>
 
   <ItemGroup>
