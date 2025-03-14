@@ -10,7 +10,6 @@ on:
 env:
   DOTNET_VERSION: '8.0.x'
   AZURE_WEBAPP_PACKAGE_PATH: '.'
-  SOLUTION_FILE: 'AzureMicroservicesPlatform.sln'
 
 jobs:
   build-and-deploy:
