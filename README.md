@@ -151,6 +151,66 @@ public class Customer : AggregateRoot
    kubectl apply -f k8s/
    ```
 
+## GitHub Actions for CI/CD
+
+This project uses GitHub Actions to automate the deployment of microservices to Azure. To set up the workflow, follow these tips:
+
+1. **GitHub Secrets**:
+   Before using the GitHub Actions workflow, ensure that you add the following secrets to your GitHub repository:
+   - **AZURE_CREDENTIALS**: The JSON output from the Azure Service Principal creation. This allows GitHub Actions to authenticate with Azure. You can get this by running:
+     ```bash
+     az ad sp create-for-rbac --name "github-actions-aviation" --role contributor --scopes /subscriptions/08398d64-5d63-4da9-8daf-e15b00f4d227 --sdk-auth
+     ```
+   - **AZURE_SUBSCRIPTION_ID**: `08398d64-5d63-4da9-8daf-e15b00f4d227`
+   - **AZURE_TENANT_ID**: `621db766-1ccd-40f1-80b0-ef469bd8f081`
+
+2. **Variable Values in Workflow**:
+   In addition to the secrets, make sure to update the following variable values in the `.github/workflows/azure-deploy.yml` file:
+   - **app-name**: Replace the placeholder values with the actual names of your Azure Web Apps (e.g., `aviation-api-gateway-app`, `aviation-identity-service`, etc.).
+   - **DOTNET_VERSION**: Ensure this is set to the correct version of .NET you are using (e.g., `8.0.x`).
+
+3. **Triggering the Workflow**:
+   The workflow is triggered automatically on pushes to the `main` branch. You can also manually trigger it from the GitHub Actions tab in your repository.
+
+4. **Monitoring Deployments**:
+   You can monitor the deployment process in the "Actions" tab of your GitHub repository. If there are any issues, the logs will provide details on what went wrong.
+
+## Azure Web Apps Creation
+
+To deploy the microservices to Azure, we created several Web Apps using the Azure CLI. Below are the commands used to create each Web App with the appropriate runtime specification.
+
+### Commands to Create Web Apps
+
+1. **Create the Identity Service Web App**:
+   ```bash
+   az webapp create --resource-group rg-aviation --plan asp-aviation --name aviation-identity-service --runtime "DOTNETCORE|8.0"
+   ```
+
+2. **Create the Aircraft Service Web App**:
+   ```bash
+   az webapp create --resource-group rg-aviation --plan asp-aviation --name aviation-aircraft-service --runtime "DOTNETCORE|8.0"
+   ```
+
+3. **Create the Customers Service Web App**:
+   ```bash
+   az webapp create --resource-group rg-aviation --plan asp-aviation --name aviation-customers-service --runtime "DOTNETCORE|8.0"
+   ```
+
+4. **Create the Subscriptions Service Web App**:
+   ```bash
+   az webapp create --resource-group rg-aviation --plan asp-aviation --name aviation-subscriptions-service --runtime "DOTNETCORE|8.0"
+   ```
+
+### Important Notes
+
+- Ensure that the runtime specified is compatible with the Azure Web App service. For .NET Core applications, the correct format is `DOTNETCORE|<version>`.
+- If you encounter issues with the runtime, you can list the supported runtimes for Linux Web Apps using the command:
+  ```bash
+  az webapp list-runtimes --os-type linux
+  ```
+
+This section documents the process of creating Azure Web Apps for the microservices in the Aviation project, ensuring that the deployment steps are clear and reproducible.
+
 ## Contributing
 
 1. Fork the repository

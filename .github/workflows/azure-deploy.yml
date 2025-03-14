@@ -1,0 +1,84 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  AZURE_WEBAPP_PACKAGE_PATH: '.'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+    
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Restore dependencies
+      run: dotnet restore
+    
+    - name: Build solution
+      run: dotnet build --configuration Release --no-restore
+    
+    - name: Run tests
+      run: dotnet test --no-build --verbosity normal
+
+    - name: Publish projects
+      run: |
+        dotnet publish AzureMicroservicesPlatform.ApiGateway/AzureMicroservicesPlatform.ApiGateway.csproj -c Release --no-build
+        dotnet publish AzureMicroservicesPlatform.Identity/AzureMicroservicesPlatform.Identity.csproj -c Release --no-build
+        dotnet publish AzureMicroservicesPlatform.Services.Aircraft/AzureMicroservicesPlatform.Services.Aircraft.csproj -c Release --no-build
+        dotnet publish AzureMicroservicesPlatform.Services.Customers/AzureMicroservicesPlatform.Services.Customers.csproj -c Release --no-build
+        dotnet publish AzureMicroservicesPlatform.Services.Subscriptions/AzureMicroservicesPlatform.Services.Subscriptions.csproj -c Release --no-build
+    
+    # Deploy API Gateway
+    - name: Deploy API Gateway
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'aviation-api-gateway-app'
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.ApiGateway/bin/Release/net8.0/publish'
+    
+    # Deploy Identity Service
+    - name: Deploy Identity Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'aviation-identity-service'
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Identity/bin/Release/net8.0/publish'
+    
+    # Deploy Aircraft Service
+    - name: Deploy Aircraft Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'aviation-aircraft-service'
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Services.Aircraft/bin/Release/net8.0/publish'
+    
+    # Deploy Customers Service
+    - name: Deploy Customers Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'aviation-customers-service'
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Services.Customers/bin/Release/net8.0/publish'
+    
+    # Deploy Subscriptions Service
+    - name: Deploy Subscriptions Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'aviation-subscriptions-service'
+        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Services.Subscriptions/bin/Release/net8.0/publish'
+
+    - name: Azure Logout
+      run: az logout
+      if: always() 
