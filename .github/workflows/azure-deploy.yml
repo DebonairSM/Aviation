@@ -4,11 +4,13 @@ on:
   push:
     branches:
       - main
+      - master
   workflow_dispatch:
 
 env:
   DOTNET_VERSION: '8.0.x'
   AZURE_WEBAPP_PACKAGE_PATH: '.'
+  SOLUTION_FILE: 'AzureMicroservicesPlatform.sln'
 
 jobs:
   build-and-deploy:
@@ -28,56 +30,56 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ${{ env.SOLUTION_FILE }}
     
     - name: Build solution
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
     
     - name: Run tests
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test ${{ env.SOLUTION_FILE }} --no-build --verbosity normal
 
     - name: Publish projects
       run: |
-        dotnet publish AzureMicroservicesPlatform.ApiGateway/AzureMicroservicesPlatform.ApiGateway.csproj -c Release --no-build
-        dotnet publish AzureMicroservicesPlatform.Identity/AzureMicroservicesPlatform.Identity.csproj -c Release --no-build
-        dotnet publish AzureMicroservicesPlatform.Services.Aircraft/AzureMicroservicesPlatform.Services.Aircraft.csproj -c Release --no-build
-        dotnet publish AzureMicroservicesPlatform.Services.Customers/AzureMicroservicesPlatform.Services.Customers.csproj -c Release --no-build
-        dotnet publish AzureMicroservicesPlatform.Services.Subscriptions/AzureMicroservicesPlatform.Services.Subscriptions.csproj -c Release --no-build
+        dotnet publish AzureMicroservicesPlatform.ApiGateway/AzureMicroservicesPlatform.ApiGateway.csproj -c Release -o ./publish/api-gateway
+        dotnet publish AzureMicroservicesPlatform.Identity/AzureMicroservicesPlatform.Identity.csproj -c Release -o ./publish/identity
+        dotnet publish AzureMicroservicesPlatform.Services.Aircraft/AzureMicroservicesPlatform.Services.Aircraft.csproj -c Release -o ./publish/aircraft
+        dotnet publish AzureMicroservicesPlatform.Services.Customers/AzureMicroservicesPlatform.Services.Customers.csproj -c Release -o ./publish/customers
+        dotnet publish AzureMicroservicesPlatform.Services.Subscriptions/AzureMicroservicesPlatform.Services.Subscriptions.csproj -c Release -o ./publish/subscriptions
     
     # Deploy API Gateway
     - name: Deploy API Gateway
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'aviation-api-gateway-app'
-        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.ApiGateway/bin/Release/net8.0/publish'
+        package: './publish/api-gateway'
     
     # Deploy Identity Service
     - name: Deploy Identity Service
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'aviation-identity-service'
-        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Identity/bin/Release/net8.0/publish'
+        package: './publish/identity'
     
     # Deploy Aircraft Service
     - name: Deploy Aircraft Service
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'aviation-aircraft-service'
-        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Services.Aircraft/bin/Release/net8.0/publish'
+        package: './publish/aircraft'
     
     # Deploy Customers Service
     - name: Deploy Customers Service
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'aviation-customers-service'
-        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Services.Customers/bin/Release/net8.0/publish'
+        package: './publish/customers'
     
     # Deploy Subscriptions Service
     - name: Deploy Subscriptions Service
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'aviation-subscriptions-service'
-        package: '${{ env.AZURE_WEBAPP_PACKAGE_PATH }}/AzureMicroservicesPlatform.Services.Subscriptions/bin/Release/net8.0/publish'
+        package: './publish/subscriptions'
 
     - name: Azure Logout
       run: az logout
