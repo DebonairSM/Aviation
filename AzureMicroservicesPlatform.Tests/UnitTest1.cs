@@ -1,13 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
+using System.Net;
 using System.Net.Http.Json;
 
-namespace AzureMicroservicesPlatform.Tests;
+namespace AzureMicroservicesPlatform.Tests.Integration;
 
-public class WeatherForecastTests : IClassFixture<WebApplicationFactory<Program>>
+public class WeatherForecastApiTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
 
-    public WeatherForecastTests(WebApplicationFactory<Program> factory)
+    public WeatherForecastApiTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }
@@ -22,7 +23,7 @@ public class WeatherForecastTests : IClassFixture<WebApplicationFactory<Program>
         var response = await client.GetAsync("/weatherforecast");
 
         // Assert
-        response.EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
     [Fact]
@@ -37,6 +38,13 @@ public class WeatherForecastTests : IClassFixture<WebApplicationFactory<Program>
         // Assert
         Assert.NotNull(forecasts);
         Assert.Equal(5, forecasts.Length);
+        Assert.All(forecasts, forecast =>
+        {
+            Assert.NotNull(forecast);
+            Assert.NotNull(forecast.Summary);
+            Assert.InRange(forecast.TemperatureC, -20, 55);
+            Assert.Equal(32 + (int)(forecast.TemperatureC / 0.5556), forecast.TemperatureF);
+        });
     }
 }
 

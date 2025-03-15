@@ -36,7 +36,12 @@ jobs:
       run: dotnet build ${{ env.SOLUTION_FILE }} --configuration Release --no-restore
     
     - name: Run tests
-      run: dotnet test ${{ env.SOLUTION_FILE }} --no-build --verbosity normal
+      run: |
+        dotnet test ${{ env.SOLUTION_FILE }} \
+          --configuration Release \
+          --no-build \
+          --verbosity normal \
+          --logger "console;verbosity=detailed"
 
     - name: Publish projects
       run: |

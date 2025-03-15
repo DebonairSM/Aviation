@@ -1,7 +1,7 @@
 ﻿using EnterpriseApiIntegration.Domain.Customers;
 using EnterpriseApiIntegration.Domain.Customers.ValueObjects;
 
-namespace EnterpriseApiIntegration.Tests;
+namespace EnterpriseApiIntegration.Tests.Domain;
 
 public class CustomerTests
 {
@@ -22,18 +22,20 @@ public class CustomerTests
     }
 
     [Theory]
-    [InlineData("", "test@example.com")]
-    [InlineData("Test Customer", "")]
-    [InlineData("Test Customer", "invalid-email")]
-    public void Customer_WithInvalidData_ShouldThrowException(string name, string email)
+    [InlineData("", "test@example.com", "Name cannot be empty")]
+    [InlineData("Test Customer", "", "Email cannot be empty")]
+    [InlineData("Test Customer", "invalid-email", "Invalid email format")]
+    public void Customer_WithInvalidData_ShouldThrowException(string name, string email, string expectedErrorMessage)
     {
-        // Arrange & Act & Assert
+        // Arrange & Act
         var exception = Record.Exception(() => Customer.Create(
             name: name,
             email: email,
             role: CustomerRole.InternalUser
         ));
 
+        // Assert
         Assert.NotNull(exception);
+        Assert.Contains(expectedErrorMessage, exception.Message);
     }
 }
