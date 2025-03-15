@@ -211,6 +211,315 @@ To deploy the microservices to Azure, we created several Web Apps using the Azur
 
 This section documents the process of creating Azure Web Apps for the microservices in the Aviation project, ensuring that the deployment steps are clear and reproducible.
 
+## Lessons Learned
+
+During the development and CI/CD implementation, we encountered and resolved several important challenges:
+
+1. **Test Project Configuration**
+   - Always set `<IsTestProject>true</IsTestProject>` in test project files
+   - Ensure test projects have proper package references with correct asset inclusion:
+     ```xml
+     <PackageReference Include="coverlet.collector" Version="6.0.0">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+     </PackageReference>
+     ```
+   - Configure VSTest settings in project files for better test discovery and logging
+
+2. **GitHub Actions Workflow Best Practices**
+   - Maintain consistency between build and test configurations (e.g., Debug vs Release)
+   - Use explicit configuration settings in test commands:
+     ```yaml
+     dotnet test --configuration Release --no-build --verbosity normal
+     ```
+   - Implement detailed logging for better troubleshooting:
+     ```yaml
+     --logger "trx;LogFileName=test-results.trx"
+     --collect:"XPlat Code Coverage"
+     ```
+   - Store test results as artifacts for post-run analysis
+
+3. **Version Control Management**
+   - When reverting changes, consider using `git revert` for shared repositories
+   - For local-only changes, `git reset` can be used with caution
+   - Always stash or commit local changes before performing repository operations
+   - Use `--force` push carefully and only when necessary
+
+4. **CI/CD Pipeline Debugging**
+   - Monitor build and test configurations across different environments
+   - Verify test assembly paths and configurations match between local and CI environments
+   - Use detailed logging and artifacts collection for troubleshooting
+   - Implement proper error handling and reporting in workflows
+
+5. **Terraform Authentication and Azure Setup**
+   - When setting up Terraform with Azure, follow these authentication steps:
+     ```powershell
+     # Set required environment variables
+     $env:ARM_CLIENT_ID="your-client-id"
+     $env:ARM_CLIENT_SECRET="your-client-secret"
+     $env:ARM_TENANT_ID="your-tenant-id"
+     $env:ARM_SUBSCRIPTION_ID="your-subscription-id"
+     ```
+   - Common authentication issues and solutions:
+     1. Invalid client secret error:
+        - Ensure you're using the secret VALUE, not the secret ID
+        - Create a new client secret if needed:
+          ```powershell
+          az ad app credential reset --id your-app-id --append
+          ```
+     2. Token/login issues:
+        - Clear existing credentials: `az logout`
+        - Login with specific scope:
+          ```powershell
+          az login --scope https://graph.microsoft.com/.default
+          ```
+   - Best practices for service principal setup:
+     ```bash
+     # Create service principal with contributor role
+     az ad sp create-for-rbac \
+       --name "terraform-sp" \
+       --role contributor \
+       --scopes /subscriptions/your-subscription-id
+     ```
+
+6. **Terraform State and Resource Management**
+   - Resource naming conventions:
+     ```hcl
+     resource "azurerm_resource_group" "rg" {
+       name     = "rg-${var.project}-${var.environment}"
+       location = var.location
+     }
+     ```
+   - App Service configuration patterns:
+     ```hcl
+     resource "azurerm_linux_web_app" "app" {
+       name                = "app-${var.service}-${var.environment}"
+       resource_group_name = azurerm_resource_group.rg.name
+       location            = azurerm_resource_group.rg.location
+       service_plan_id     = azurerm_service_plan.plan.id
+       
+       site_config {
+         application_stack {
+           dotnet_version = "8.0"
+         }
+       }
+       
+       app_settings = {
+         "ASPNETCORE_ENVIRONMENT" = title(var.environment)
+         "KeyVaultName"          = "kv-${var.project}-${var.environment}"
+       }
+     }
+     ```
+   - Environment-specific configurations:
+     ```hcl
+     # terraform.tfvars
+     environment          = "qa"
+     resource_group      = "rg-aviation-qa"
+     location            = "eastus2"
+     app_service_plan_sku = "B1"  # Use different SKUs per environment
+     ```
+
+7. **Terraform Workflow Best Practices**
+   - Always run `terraform init` after adding new providers or modules
+   - Use `terraform plan` to review changes before applying
+   - Save plans for critical environments:
+     ```bash
+     terraform plan -out=qa.tfplan
+     terraform apply qa.tfplan
+     ```
+   - Use consistent formatting:
+     ```bash
+     terraform fmt -recursive
+     ```
+   - Validate configurations:
+     ```bash
+     terraform validate
+     ```
+
+## Infrastructure as Code (IaC)
+
+This project uses Terraform to automate infrastructure provisioning across multiple environments (QA, Pre-prod, and Production). The infrastructure code is stored in the `terraform/` directory.
+
+### Directory Structure
+
+```
+terraform/
+├── environments/
+│   ├── qa/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── terraform.tfvars
+│   ├── pre-prod/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── terraform.tfvars
+│   └── prod/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── terraform.tfvars
+├── modules/
+│   ├── app-service/
+│   ├── sql-database/
+│   └── key-vault/
+└── backend.tf
+```
+
+### Environment Configuration
+
+Each environment (QA, Pre-prod, Prod) uses the same module configurations with different variables:
+
+```hcl
+# environments/qa/main.tf example
+module "web_apps" {
+  source = "../../modules/app-service"
+  
+  environment     = "qa"
+  resource_group  = "rg-aviation-qa"
+  location        = "eastus2"
+  
+  apps = {
+    identity = {
+      name     = "aviation-identity-qa"
+      sku_name = "B1"
+    }
+    aircraft = {
+      name     = "aviation-aircraft-qa"
+      sku_name = "B1"
+    }
+    # ... other services
+  }
+}
+```
+
+### GitHub Actions Integration
+
+The infrastructure deployment is integrated into the CI/CD pipeline using GitHub Actions. Add these secrets to your repository:
+
+- `ARM_CLIENT_ID`: Azure Service Principal ID
+- `ARM_CLIENT_SECRET`: Azure Service Principal Secret
+- `ARM_SUBSCRIPTION_ID`: Azure Subscription ID
+- `ARM_TENANT_ID`: Azure Tenant ID
+
+Example workflow for infrastructure deployment:
+
+```yaml
+name: 'Infrastructure Deployment'
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'terraform/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'qa'
+        type: choice
+        options:
+          - qa
+          - pre-prod
+          - prod
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'qa' }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      
+    - name: Terraform Init
+      run: |
+        cd terraform/environments/${{ github.event.inputs.environment || 'qa' }}
+        terraform init
+      env:
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        
+    - name: Terraform Plan
+      run: |
+        cd terraform/environments/${{ github.event.inputs.environment || 'qa' }}
+        terraform plan
+      
+    - name: Terraform Apply
+      if: github.ref == 'refs/heads/main'
+      run: |
+        cd terraform/environments/${{ github.event.inputs.environment || 'qa' }}
+        terraform apply -auto-approve
+```
+
+### State Management
+
+The Terraform state is stored in Azure Storage Account for better collaboration and state locking:
+
+```hcl
+# backend.tf
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "rg-terraform-state"
+    storage_account_name = "tfstateaviation"
+    container_name      = "tfstate"
+    key                 = "terraform.tfstate"
+  }
+}
+```
+
+### Environment Promotion
+
+The infrastructure follows a promotion path:
+1. Changes are first applied to QA
+2. After testing, promoted to Pre-prod
+3. Finally, deployed to Production
+
+This is managed through GitHub Actions environments and approval processes:
+
+```yaml
+environments:
+  qa:
+    deployment_branch_policy:
+      protected_branches: false
+  pre-prod:
+    deployment_branch_policy:
+      protected_branches: true
+    reviewers:
+      - tech-leads
+  prod:
+    deployment_branch_policy:
+      protected_branches: true
+    reviewers:
+      - release-managers
+```
+
+### Best Practices
+
+1. **State Management**
+   - Use remote state storage in Azure Storage Account
+   - Enable state locking to prevent concurrent modifications
+   - Use workspaces for environment isolation
+
+2. **Security**
+   - Store sensitive values in Azure Key Vault
+   - Use managed identities where possible
+   - Implement least privilege access
+
+3. **Module Design**
+   - Create reusable modules for common infrastructure
+   - Version modules for better change management
+   - Document module inputs and outputs
+
+4. **Cost Management**
+   - Use different SKUs per environment
+   - Implement auto-scaling rules
+   - Set up cost alerts and budgets
+
 ## Contributing
 
 1. Fork the repository
