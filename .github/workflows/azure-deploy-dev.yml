@@ -1,17 +1,16 @@
-name: Deploy to Azure
+name: Deploy to Azure Dev
 
 on:
   push:
     branches:
       - main
       - master
-  workflow_dispatch:
 
 env:
   DOTNET_VERSION: '8.0.x'
   SOLUTION_FILE: 'EnterpriseApiIntegration.sln'
   REGISTRY_NAME: 'aviacr'
-  RESOURCE_GROUP: 'rg-aviation-qa'
+  RESOURCE_GROUP: 'rg-aviation-dev'
 
 jobs:
   build-and-deploy:
@@ -83,25 +82,25 @@ jobs:
     - name: Deploy Identity Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'aviation-identity-qa'
+        app-name: 'aviation-identity-dev'
         images: '${{ env.REGISTRY_NAME }}.azurecr.io/identity:${{ github.sha }}'
 
     - name: Deploy Aircraft Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'aviation-aircraft-qa'
+        app-name: 'aviation-aircraft-dev'
         images: '${{ env.REGISTRY_NAME }}.azurecr.io/aircraft:${{ github.sha }}'
 
     - name: Deploy Customers Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'aviation-customers-qa'
+        app-name: 'aviation-customers-dev'
         images: '${{ env.REGISTRY_NAME }}.azurecr.io/customers:${{ github.sha }}'
 
     - name: Deploy Subscriptions Service
       uses: azure/webapps-deploy@v2
       with:
-        app-name: 'aviation-subscriptions-qa'
+        app-name: 'aviation-subscriptions-dev'
         images: '${{ env.REGISTRY_NAME }}.azurecr.io/subscriptions:${{ github.sha }}'
 
     - name: Azure Logout

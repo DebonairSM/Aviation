@@ -1,20 +1,26 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-WORKDIR /app
-EXPOSE 80
-EXPOSE 443
-
+# Use the official .NET SDK image as the build image
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
+
+# Copy the solution file and restore dependencies
+COPY ["EnterpriseApiIntegration.sln", "./"]
 COPY ["AzureMicroservicesPlatform.Services.Aircraft/AzureMicroservicesPlatform.Services.Aircraft.csproj", "AzureMicroservicesPlatform.Services.Aircraft/"]
+COPY ["EnterpriseApiIntegration.Domain/EnterpriseApiIntegration.Domain.csproj", "EnterpriseApiIntegration.Domain/"]
+COPY ["EnterpriseApiIntegration.Application/EnterpriseApiIntegration.Application.csproj", "EnterpriseApiIntegration.Application/"]
+COPY ["EnterpriseApiIntegration.Infrastructure/EnterpriseApiIntegration.Infrastructure.csproj", "EnterpriseApiIntegration.Infrastructure/"]
 RUN dotnet restore "AzureMicroservicesPlatform.Services.Aircraft/AzureMicroservicesPlatform.Services.Aircraft.csproj"
+
+# Copy the rest of the source code
 COPY . .
-WORKDIR "/src/AzureMicroservicesPlatform.Services.Aircraft"
-RUN dotnet build "AzureMicroservicesPlatform.Services.Aircraft.csproj" -c Release -o /app/build
 
-FROM build AS publish
-RUN dotnet publish "AzureMicroservicesPlatform.Services.Aircraft.csproj" -c Release -o /app/publish
+# Build the application
+RUN dotnet build "AzureMicroservicesPlatform.Services.Aircraft/AzureMicroservicesPlatform.Services.Aircraft.csproj" -c Release -o /app/build
 
-FROM base AS final
+# Publish the application
+RUN dotnet publish "AzureMicroservicesPlatform.Services.Aircraft/AzureMicroservicesPlatform.Services.Aircraft.csproj" -c Release -o /app/publish
+
+# Build the runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=build /app/publish .
 ENTRYPOINT ["dotnet", "AzureMicroservicesPlatform.Services.Aircraft.dll"] 
