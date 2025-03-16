@@ -142,16 +142,23 @@ public class Customer : AggregateRoot
 1. **Docker-Based Deployment Implementation**
    - Containerized all microservices for consistent deployment
    - Implemented multi-stage Docker builds for optimized images
-   - Set up container registry integration with Azure Container Registry
+   - Set up container registry integration with Azure Container Registry (aviationqa2024)
    - Configured container-based deployment to Azure Web Apps
+   - Successfully resolved ACR naming conflicts by implementing globally unique naming strategy
 
-2. **Version Control Improvements**
+2. **Azure Container Registry Setup**
+   - Established secure ACR authentication using admin credentials
+   - Implemented GitHub Actions secrets for ACR authentication
+   - Updated deployment workflows to use centralized ACR configuration
+   - Standardized image tagging and versioning strategy
+
+3. **Version Control Improvements**
    - Successfully cleaned up Terraform state files from version control
    - Implemented proper `.gitignore` patterns for Terraform files
    - Removed cached `.terraform` directories using `git filter-branch`
    - Fixed issues with large file handling in the repository
 
-3. **Infrastructure Management**
+4. **Infrastructure Management**
    - Enhanced Terraform state management
    - Improved handling of provider versions
    - Better organization of environment-specific configurations
@@ -163,48 +170,48 @@ public class Customer : AggregateRoot
 1. Build Docker images for each service:
    ```bash
    # Build Identity Service
-   docker build -t aviation.azurecr.io/identity:latest -f src/AzureMicroservicesPlatform.Identity/Dockerfile .
+   docker build -t aviationqa2024.azurecr.io/identity:latest -f src/AzureMicroservicesPlatform.Identity/Dockerfile .
    
    # Build Aircraft Service
-   docker build -t aviation.azurecr.io/aircraft:latest -f src/AzureMicroservicesPlatform.Services/Aircraft/Dockerfile .
+   docker build -t aviationqa2024.azurecr.io/aircraft:latest -f src/AzureMicroservicesPlatform.Services/Aircraft/Dockerfile .
    
    # Build Customers Service
-   docker build -t aviation.azurecr.io/customers:latest -f src/AzureMicroservicesPlatform.Services/Customers/Dockerfile .
+   docker build -t aviationqa2024.azurecr.io/customers:latest -f src/AzureMicroservicesPlatform.Services/Customers/Dockerfile .
    
    # Build Subscriptions Service
-   docker build -t aviation.azurecr.io/subscriptions:latest -f src/AzureMicroservicesPlatform.Services/Subscriptions/Dockerfile .
+   docker build -t aviationqa2024.azurecr.io/subscriptions:latest -f src/AzureMicroservicesPlatform.Services/Subscriptions/Dockerfile .
    ```
 
 2. Push images to Azure Container Registry:
    ```bash
    # Login to Azure Container Registry
-   az acr login --name aviation
+   az acr login --name aviationqa2024
    
    # Push all images
-   docker push aviation.azurecr.io/identity:latest
-   docker push aviation.azurecr.io/aircraft:latest
-   docker push aviation.azurecr.io/customers:latest
-   docker push aviation.azurecr.io/subscriptions:latest
+   docker push aviationqa2024.azurecr.io/identity:latest
+   docker push aviationqa2024.azurecr.io/aircraft:latest
+   docker push aviationqa2024.azurecr.io/customers:latest
+   docker push aviationqa2024.azurecr.io/subscriptions:latest
    ```
 
 3. Deploy to Azure Web Apps for Containers:
    ```bash
    # Update each web app with the latest container image
    az webapp config container set --name aviation-identity-service --resource-group rg-aviation \
-       --docker-custom-image-name aviation.azurecr.io/identity:latest \
-       --docker-registry-server-url https://aviation.azurecr.io
+       --docker-custom-image-name aviationqa2024.azurecr.io/identity:latest \
+       --docker-registry-server-url https://aviationqa2024.azurecr.io
    
    az webapp config container set --name aviation-aircraft-service --resource-group rg-aviation \
-       --docker-custom-image-name aviation.azurecr.io/aircraft:latest \
-       --docker-registry-server-url https://aviation.azurecr.io
+       --docker-custom-image-name aviationqa2024.azurecr.io/aircraft:latest \
+       --docker-registry-server-url https://aviationqa2024.azurecr.io
    
    az webapp config container set --name aviation-customers-service --resource-group rg-aviation \
-       --docker-custom-image-name aviation.azurecr.io/customers:latest \
-       --docker-registry-server-url https://aviation.azurecr.io
+       --docker-custom-image-name aviationqa2024.azurecr.io/customers:latest \
+       --docker-registry-server-url https://aviationqa2024.azurecr.io
    
    az webapp config container set --name aviation-subscriptions-service --resource-group rg-aviation \
-       --docker-custom-image-name aviation.azurecr.io/subscriptions:latest \
-       --docker-registry-server-url https://aviation.azurecr.io
+       --docker-custom-image-name aviationqa2024.azurecr.io/subscriptions:latest \
+       --docker-registry-server-url https://aviationqa2024.azurecr.io
    ```
 
 ### Important Deployment Notes
@@ -246,23 +253,31 @@ This project uses GitHub Actions to automate the deployment of microservices to 
 
 1. **GitHub Secrets**:
    Before using the GitHub Actions workflow, ensure that you add the following secrets to your GitHub repository:
-   - **AZURE_CREDENTIALS**: The JSON output from the Azure Service Principal creation. This allows GitHub Actions to authenticate with Azure. You can get this by running:
-     ```bash
-     az ad sp create-for-rbac --name "github-actions-aviation" --role contributor --scopes /subscriptions/08398d64-5d63-4da9-8daf-e15b00f4d227 --sdk-auth
-     ```
-   - **AZURE_SUBSCRIPTION_ID**: `08398d64-5d63-4da9-8daf-e15b00f4d227`
-   - **AZURE_TENANT_ID**: `621db766-1ccd-40f1-80b0-ef469bd8f081`
+   - **AZURE_CREDENTIALS**: The JSON output from the Azure Service Principal creation
+   - **AZURE_SUBSCRIPTION_ID**: Your Azure subscription ID
+   - **AZURE_TENANT_ID**: Your Azure tenant ID
+   - **ACR_USERNAME**: Your Azure Container Registry username
+   - **ACR_PASSWORD**: Your Azure Container Registry password
 
-2. **Variable Values in Workflow**:
-   In addition to the secrets, make sure to update the following variable values in the `.github/workflows/azure-deploy.yml` file:
-   - **app-name**: Replace the placeholder values with the actual names of your Azure Web Apps (e.g., `aviation-api-gateway-app`, `aviation-identity-service`, etc.).
-   - **DOTNET_VERSION**: Ensure this is set to the correct version of .NET you are using (e.g., `8.0.x`).
+2. **Azure Container Registry Setup**:
+   - Create ACR with a globally unique name (e.g., aviationqa2024)
+   - Enable admin user access for GitHub Actions authentication
+   - Store ACR credentials securely in GitHub Secrets
+   - Use consistent image tagging across environments
 
-3. **Triggering the Workflow**:
-   The workflow is triggered automatically on pushes to the `main` branch. You can also manually trigger it from the GitHub Actions tab in your repository.
+3. **Authentication Best Practices**:
+   - Use Azure CLI for local development and testing
+   - Implement service principal authentication for automation
+   - Store sensitive credentials in GitHub Secrets
+   - Regularly rotate ACR admin credentials
+   - Use managed identities where possible in Azure services
 
-4. **Monitoring Deployments**:
-   You can monitor the deployment process in the "Actions" tab of your GitHub repository. If there are any issues, the logs will provide details on what went wrong.
+4. **Common Issues and Solutions**:
+   - ACR name conflicts: Use globally unique names with environment/year suffix
+   - Authentication failures: Ensure proper login with correct tenant ID
+   - Permission issues: Verify service principal roles and scope
+   - Image push failures: Check registry name and credentials
+   - Deployment errors: Verify Web App container configuration
 
 ## Azure Web Apps Creation
 
