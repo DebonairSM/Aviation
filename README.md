@@ -137,19 +137,108 @@ public class Customer : AggregateRoot
    - Integration test repositories
    - End-to-end test critical paths
 
+## Latest Accomplishments
+
+1. **Docker-Based Deployment Implementation**
+   - Containerized all microservices for consistent deployment
+   - Implemented multi-stage Docker builds for optimized images
+   - Set up container registry integration with Azure Container Registry
+   - Configured container-based deployment to Azure Web Apps
+
+2. **Version Control Improvements**
+   - Successfully cleaned up Terraform state files from version control
+   - Implemented proper `.gitignore` patterns for Terraform files
+   - Removed cached `.terraform` directories using `git filter-branch`
+   - Fixed issues with large file handling in the repository
+
+3. **Infrastructure Management**
+   - Enhanced Terraform state management
+   - Improved handling of provider versions
+   - Better organization of environment-specific configurations
+
 ## Deployment
 
-### Azure Kubernetes Service (AKS)
+### Docker-Based Deployment
 
-1. Create an AKS cluster:
+1. Build Docker images for each service:
    ```bash
-   az aks create --resource-group <YourResourceGroup> --name <YourAKSClusterName> --node-count 1 --enable-addons monitoring --generate-ssh-keys
+   # Build Identity Service
+   docker build -t aviation.azurecr.io/identity:latest -f src/AzureMicroservicesPlatform.Identity/Dockerfile .
+   
+   # Build Aircraft Service
+   docker build -t aviation.azurecr.io/aircraft:latest -f src/AzureMicroservicesPlatform.Services/Aircraft/Dockerfile .
+   
+   # Build Customers Service
+   docker build -t aviation.azurecr.io/customers:latest -f src/AzureMicroservicesPlatform.Services/Customers/Dockerfile .
+   
+   # Build Subscriptions Service
+   docker build -t aviation.azurecr.io/subscriptions:latest -f src/AzureMicroservicesPlatform.Services/Subscriptions/Dockerfile .
    ```
 
-2. Deploy the services:
+2. Push images to Azure Container Registry:
    ```bash
-   kubectl apply -f k8s/
+   # Login to Azure Container Registry
+   az acr login --name aviation
+   
+   # Push all images
+   docker push aviation.azurecr.io/identity:latest
+   docker push aviation.azurecr.io/aircraft:latest
+   docker push aviation.azurecr.io/customers:latest
+   docker push aviation.azurecr.io/subscriptions:latest
    ```
+
+3. Deploy to Azure Web Apps for Containers:
+   ```bash
+   # Update each web app with the latest container image
+   az webapp config container set --name aviation-identity-service --resource-group rg-aviation \
+       --docker-custom-image-name aviation.azurecr.io/identity:latest \
+       --docker-registry-server-url https://aviation.azurecr.io
+   
+   az webapp config container set --name aviation-aircraft-service --resource-group rg-aviation \
+       --docker-custom-image-name aviation.azurecr.io/aircraft:latest \
+       --docker-registry-server-url https://aviation.azurecr.io
+   
+   az webapp config container set --name aviation-customers-service --resource-group rg-aviation \
+       --docker-custom-image-name aviation.azurecr.io/customers:latest \
+       --docker-registry-server-url https://aviation.azurecr.io
+   
+   az webapp config container set --name aviation-subscriptions-service --resource-group rg-aviation \
+       --docker-custom-image-name aviation.azurecr.io/subscriptions:latest \
+       --docker-registry-server-url https://aviation.azurecr.io
+   ```
+
+### Important Deployment Notes
+
+- Each service includes a multi-stage Dockerfile for optimized builds
+- Images are versioned using Git commit SHA and latest tag
+- Azure Container Registry handles image storage and distribution
+- Web Apps for Containers provides managed container hosting
+- Container logs can be accessed via:
+  ```bash
+  az webapp log tail --name <app-name> --resource-group rg-aviation
+  ```
+
+### Container Configuration
+
+Each service's Dockerfile follows this pattern:
+
+```dockerfile
+# Build stage
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+COPY ["ServiceName.csproj", "./"]
+RUN dotnet restore
+COPY . .
+RUN dotnet publish -c Release -o /app/publish
+
+# Runtime stage
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "ServiceName.dll"]
+```
+
+Environment-specific configurations are handled through environment variables in Azure Web App settings.
 
 ## GitHub Actions for CI/CD
 
