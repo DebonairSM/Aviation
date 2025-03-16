@@ -25,24 +25,28 @@ module "web_apps" {
       name = "aviation-identity-qa"
       settings = {
         "KeyVaultName" = "kv-aviation-qa"
+        "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }
     aircraft = {
       name = "aviation-aircraft-qa"
       settings = {
         "KeyVaultName" = "kv-aviation-qa"
+        "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }
     customers = {
       name = "aviation-customers-qa"
       settings = {
         "KeyVaultName" = "kv-aviation-qa"
+        "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }
     subscriptions = {
       name = "aviation-subscriptions-qa"
       settings = {
         "KeyVaultName" = "kv-aviation-qa"
+        "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }
   }

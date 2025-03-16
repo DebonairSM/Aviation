@@ -3,7 +3,6 @@ name: Deploy to Azure Dev
 on:
   push:
     branches:
-      - main
       - master
 
 env:
