@@ -23,7 +23,6 @@
     <ProjectReference Include="..\EnterpriseApiIntegration.Domain\EnterpriseApiIntegration.Domain.csproj" />
     <ProjectReference Include="..\EnterpriseApiIntegration.Infrastructure\EnterpriseApiIntegration.Infrastructure.csproj" />
     <ProjectReference Include="..\EnterpriseApiIntegration.Application\EnterpriseApiIntegration.Application.csproj" />
-    <ProjectReference Include="..\EnterpriseApiIntegration.Api\EnterpriseApiIntegration.Api.csproj" />
   </ItemGroup>
 
 </Project>
