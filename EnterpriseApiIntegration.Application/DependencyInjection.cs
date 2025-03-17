@@ -2,61 +2,44 @@ using System.Reflection;
 using EnterpriseApiIntegration.Application.Interfaces;
 using EnterpriseApiIntegration.Application.Services;
 using EnterpriseApiIntegration.Application.Features.Aircraft;
-using EnterpriseApiIntegration.Application.Features.Customers;
-using EnterpriseApiIntegration.Application.Features.Subscriptions;
-using EnterpriseApiIntegration.Application.Customers.Commands.CreateCustomer;
+using EnterpriseApiIntegration.Application.Features.Aircraft.Queries;
+using EnterpriseApiIntegration.Application.Features.Aircraft.Commands;
 using Microsoft.Extensions.DependencyInjection;
+using MediatR;
 
 namespace EnterpriseApiIntegration.Application;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
-    {
-        // Register application services
-        services.AddScoped<IAircraftService, AircraftService>();
-        services.AddScoped<ICustomerService, CustomerService>();
-        services.AddScoped<ISubscriptionService, SubscriptionService>();
-
-        return services;
-    }
-
     public static IServiceCollection AddAircraftServices(this IServiceCollection services)
     {
         // Register MediatR handlers for Aircraft service
         services.AddMediatR(cfg => {
-            cfg.RegisterServicesFromAssemblyContaining<AircraftDto>();
+            // Register only Aircraft-specific handlers by scanning the specific namespace
+            var assembly = typeof(GetAircraftQuery).Assembly;
+            var types = assembly.GetTypes()
+                .Where(t => t.Namespace?.StartsWith("EnterpriseApiIntegration.Application.Features.Aircraft") == true)
+                .Where(t => t.GetInterfaces()
+                    .Any(i => i.IsGenericType && 
+                             (i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
+                              i.GetGenericTypeDefinition() == typeof(IRequestHandler<>))));
+            
+            foreach (var type in types)
+            {
+                var handlerInterfaces = type.GetInterfaces()
+                    .Where(i => i.IsGenericType && 
+                               (i.GetGenericTypeDefinition() == typeof(IRequestHandler<,>) ||
+                                i.GetGenericTypeDefinition() == typeof(IRequestHandler<>)));
+
+                foreach (var handlerInterface in handlerInterfaces)
+                {
+                    services.AddTransient(handlerInterface, type);
+                }
+            }
         });
 
         // Register Aircraft-specific services
         services.AddScoped<IAircraftService, AircraftService>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddCustomerServices(this IServiceCollection services)
-    {
-        // Register MediatR handlers for Customer service
-        services.AddMediatR(cfg => {
-            cfg.RegisterServicesFromAssembly(typeof(CustomerDto).Assembly);
-            cfg.RegisterServicesFromAssembly(typeof(CreateCustomerCommand).Assembly);
-        });
-
-        // Register Customer-specific services
-        services.AddScoped<ICustomerService, CustomerService>();
-
-        return services;
-    }
-
-    public static IServiceCollection AddSubscriptionServices(this IServiceCollection services)
-    {
-        // Register MediatR handlers for Subscription service
-        services.AddMediatR(cfg => {
-            cfg.RegisterServicesFromAssemblyContaining<SubscriptionDto>();
-        });
-
-        // Register Subscription-specific services
-        services.AddScoped<ISubscriptionService, SubscriptionService>();
 
         return services;
     }

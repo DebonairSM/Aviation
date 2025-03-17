@@ -105,13 +105,13 @@ You can set up Azure authentication in PowerShell to avoid logging in repeatedly
 
 ```powershell
 # Set Azure environment variables
-$env:ARM_CLIENT_ID = "your-client-id"
-$env:ARM_CLIENT_SECRET = "your-client-secret"
-$env:ARM_SUBSCRIPTION_ID = "your-subscription-id"
-$env:ARM_TENANT_ID = "your-tenant-id"
+$env:ARM_CLIENT_ID = "e96126b4-d4f9-4716-adac-afa697eee97d"
+$env:ARM_CLIENT_SECRET = "cVs8Q~KqdWhBZARCdcCHa6IGqHQiDQG8O2_sgb5o"
+$env:ARM_SUBSCRIPTION_ID = "08398d64-5d63-4da9-8daf-e15b00f4d227"
+$env:ARM_TENANT_ID = "621db766-1ccd-40f1-80b0-ef469bd8f081"
 
 # Or set them all at once
-$env:ARM_CLIENT_ID = "your-client-id"; $env:ARM_CLIENT_SECRET = "your-client-secret"; $env:ARM_SUBSCRIPTION_ID = "your-subscription-id"; $env:ARM_TENANT_ID = "your-tenant-id"
+$env:ARM_CLIENT_ID = "e96126b4-d4f9-4716-adac-afa697eee97d"; $env:ARM_CLIENT_SECRET = "cVs8Q~KqdWhBZARCdcCHa6IGqHQiDQG8O2_sgb5o"; $env:ARM_SUBSCRIPTION_ID = "08398d64-5d63-4da9-8daf-e15b00f4d227"; $env:ARM_TENANT_ID = "621db766-1ccd-40f1-80b0-ef469bd8f081"
 ```
 
 These environment variables will persist for your current PowerShell session. To make them permanent, you can add them to your PowerShell profile:
@@ -121,15 +121,33 @@ These environment variables will persist for your current PowerShell session. To
 notepad $PROFILE
 
 # Add the environment variables
-$env:ARM_CLIENT_ID = "your-client-id"
-$env:ARM_CLIENT_SECRET = "your-client-secret"
-$env:ARM_SUBSCRIPTION_ID = "your-subscription-id"
-$env:ARM_TENANT_ID = "your-tenant-id"
+$env:ARM_CLIENT_ID = "e96126b4-d4f9-4716-adac-afa697eee97d"
+$env:ARM_CLIENT_SECRET = "cVs8Q~KqdWhBZARCdcCHa6IGqHQiDQG8O2_sgb5o"
+$env:ARM_SUBSCRIPTION_ID = "08398d64-5d63-4da9-8daf-e15b00f4d227"
+$env:ARM_TENANT_ID = "621db766-1ccd-40f1-80b0-ef469bd8f081"
 ```
+
+### Quick Setup with PowerShell Script
+
+The project includes a PowerShell script `setup-entra-id.ps1` that automates the Azure AD configuration:
+
+```powershell
+# Run the setup script
+.\setup-entra-id.ps1
+```
+
+This script will:
+1. Set up environment variables
+2. Log in to Azure with the service principal
+3. Update the app registration
+4. Configure Graph API permissions
+5. Create a new client secret
+6. Grant admin consent
+7. Save the configuration to azure-config.json
 
 ### Configuring Graph API Permissions
 
-To enable service-to-service authentication and management capabilities, you need to configure the following Graph API permissions:
+The application requires specific Graph API permissions for service-to-service authentication and management capabilities. These permissions are configured in the Azure Portal:
 
 1. Go to Azure Portal (portal.azure.com)
 2. Navigate to Azure Active Directory (Entra ID)
@@ -140,9 +158,9 @@ To enable service-to-service authentication and management capabilities, you nee
 7. Select "Microsoft Graph"
 8. Select "Application permissions"
 9. Add these permissions:
-   - Application.ReadWrite.All
-   - Directory.Read.All
-   - Directory.ReadWrite.All
+   - Application.ReadWrite.All (ID: 1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9)
+   - Directory.Read.All (ID: df021288-bdef-4463-88db-98f22de89214)
+   - Directory.ReadWrite.All (ID: 19dbc75e-c2e2-444c-a770-ec69d8559fc7)
 10. Click "Grant admin consent"
 
 These permissions are required for:
@@ -151,7 +169,13 @@ These permissions are required for:
 - Managing service principals
 - Configuring API permissions
 
+Additionally, the service principal needs these Azure AD roles:
+- Application Administrator
+- Cloud Application Administrator
+
 ### Service Endpoints
+
+The following services are deployed in the QA environment:
 
 - API Gateway: https://aviation-gateway-qa.azurewebsites.net
 - Identity Service: https://aviation-identity-qa.azurewebsites.net
@@ -211,10 +235,10 @@ To deploy or update infrastructure:
 2. **Configure Terraform Variables**:
    Create a `terraform.tfvars` file in your environment directory with:
    ```hcl
-   subscription_id = "your-subscription-id"
-   tenant_id       = "your-tenant-id"
-   client_id       = "your-client-id"
-   client_secret   = "your-client-secret"
+   subscription_id = "08398d64-5d63-4da9-8daf-e15b00f4d227"
+   tenant_id       = "621db766-1ccd-40f1-80b0-ef469bd8f081"
+   client_id       = "e96126b4-d4f9-4716-adac-afa697eee97d"
+   client_secret   = "cVs8Q~KqdWhBZARCdcCHa6IGqHQiDQG8O2_sgb5o"
    ```
 
 3. **Initialize and Apply**:
@@ -266,8 +290,17 @@ Each workflow requires the following secrets in your GitHub repository:
 
 1. **Azure Authentication**:
    - **AZURE_CREDENTIALS**: The JSON output from the Azure Service Principal creation
-   - **AZURE_SUBSCRIPTION_ID**: Your Azure subscription ID
-   - **AZURE_TENANT_ID**: Your Azure tenant ID
+   - **AZURE_SUBSCRIPTION_ID**: 08398d64-5d63-4da9-8daf-e15b00f4d227
+   - **AZURE_TENANT_ID**: 621db766-1ccd-40f1-80b0-ef469bd8f081
+   - **AZURE_CLIENT_ID**: e96126b4-d4f9-4716-adac-afa697eee97d
+   - **AZURE_CLIENT_SECRET**: cVs8Q~KqdWhBZARCdcCHa6IGqHQiDQG8O2_sgb5o
+
+> **Important**: When updating the client secret, make sure to update it in all places:
+> 1. Local environment variables
+> 2. GitHub Actions secrets
+> 3. Terraform variables
+> 4. Azure Key Vault (if used)
+> 5. Any other services or applications using these credentials
 
 ## Contributing
 

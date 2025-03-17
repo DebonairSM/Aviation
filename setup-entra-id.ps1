@@ -11,48 +11,29 @@ $env:ARM_TENANT_ID = "621db766-1ccd-40f1-80b0-ef469bd8f081"
 $tenantId = $env:ARM_TENANT_ID
 $clientId = $env:ARM_CLIENT_ID
 $appName = "Aircraft Service API"
-$apiScope = "access_as_user"
 
 # Login to Azure with service principal
 Write-Host "Logging in to Azure with service principal..."
 az login --service-principal -u $env:ARM_CLIENT_ID -p $env:ARM_CLIENT_SECRET --tenant $env:ARM_TENANT_ID
 az account set --subscription $env:ARM_SUBSCRIPTION_ID
 
-# Ensure Microsoft.Graph is installed
-Write-Host "Ensuring Microsoft.Graph extension is installed..."
-az extension add --name microsoft-graph
-
 # Update the app registration
 Write-Host "Updating app registration..."
-az ad app update --id $clientId --display-name $appName --sign-in-audience AzureADMyOrg --enable-id-token-issuance true
+az ad app update --id $clientId --display-name $appName --sign-in-audience AzureADMyOrg
 
 # Configure API permissions
 Write-Host "Configuring API permissions..."
-az ad app permission add --id $clientId --api 00000003-0000-0000-c000-000000000000 --api-permissions "User.Read=Scope" "User.Read.All=Scope"
+az rest --method PATCH --uri "https://graph.microsoft.com/v1.0/applications/d5f046b0-db64-47e3-96b3-d2ff434f7354" --headers "Content-Type=application/json" --body '{\"requiredResourceAccess\":[{\"resourceAppId\":\"00000003-0000-0000-c000-000000000000\",\"resourceAccess\":[{\"id\":\"1bfefb4e-e0b5-418b-a88f-73c46d2cc8e9\",\"type\":\"Role\"},{\"id\":\"df021288-bdef-4463-88db-98f22de89214\",\"type\":\"Role\"},{\"id\":\"19dbc75e-c2e2-444c-a770-ec69d8559fc7\",\"type\":\"Role\"}]}]}'
 
 # Create client secret
 Write-Host "Creating client secret..."
-$secret = az ad app credential reset --id $clientId --query "password" -o tsv
+$secret = az ad app credential reset --id $clientId --append --query "password" -o tsv
 Write-Host "Client Secret: $secret"
 Write-Host "IMPORTANT: Save this secret somewhere safe!"
 
-# Configure API scope
-Write-Host "Configuring API scope..."
-$apiId = "api://$clientId"
-az ad app update --id $clientId --identifier-uris $apiId
-
-# Add API scope
-Write-Host "Adding API scope..."
-az ad app update --id $clientId `
-    --set "api.oauth2PermissionScopes[0].value=$apiScope" `
-    --set "api.oauth2PermissionScopes[0].adminConsentDisplayName=Access as user" `
-    --set "api.oauth2PermissionScopes[0].adminConsentDescription=Allow the application to access the API on behalf of the signed-in user" `
-    --set "api.oauth2PermissionScopes[0].isEnabled=true" `
-    --set "api.oauth2PermissionScopes[0].type=User"
-
 # Grant admin consent for the API permissions
 Write-Host "Granting admin consent..."
-az ad app permission admin-consent --id $clientId
+az ad app permission grant --id $clientId --api 00000003-0000-0000-c000-000000000000 --scope "Application.ReadWrite.All Directory.Read.All Directory.ReadWrite.All"
 
 Write-Host "Configuration complete!"
 Write-Host "Please save the client secret shown above."
@@ -62,9 +43,7 @@ Write-Host "You can now use this configuration in your application."
 $config = @{
     TenantId = $tenantId
     ClientId = $clientId
-    ApiScope = $apiScope
     ClientSecret = $secret
-    ApiId = $apiId
 } | ConvertTo-Json
 
 Set-Content -Path "azure-config.json" -Value $config

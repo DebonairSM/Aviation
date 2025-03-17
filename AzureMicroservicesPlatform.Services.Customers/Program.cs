@@ -8,6 +8,7 @@ using EnterpriseApiIntegration.Domain.Customers;
 using EnterpriseApiIntegration.Infrastructure.Persistence;
 using EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
 using MediatR;
+using AzureMicroservicesPlatform.Services.Customers;
 
 var builder = WebApplication.CreateBuilder(args);
 

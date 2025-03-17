@@ -1,8 +1,8 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using EnterpriseApiIntegration.Application.Features.Aircraft.Commands;
-using EnterpriseApiIntegration.Application.Features.Aircraft.Queries;
+using AzureMicroservicesPlatform.Services.Aircraft.Application.Features.Commands;
+using AzureMicroservicesPlatform.Services.Aircraft.Application.Features.Queries;
 
 namespace AzureMicroservicesPlatform.Services.Aircraft.Controllers;
 
@@ -19,7 +19,6 @@ public class AircraftController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "RequireInternalUserRole")]
     public async Task<IActionResult> GetAircraft()
     {
         var query = new GetAircraftQuery();
@@ -28,16 +27,14 @@ public class AircraftController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [Authorize(Policy = "RequireInternalUserRole")]
     public async Task<IActionResult> GetAircraft(int id)
     {
-        var query = new GetAircraftByIdQuery { Id = id };
+        var query = new GetAircraftByIdQuery(id);
         var result = await _mediator.Send(query);
         return result != null ? Ok(result) : NotFound();
     }
 
     [HttpPost]
-    [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> CreateAircraft([FromBody] CreateAircraftCommand command)
     {
         var result = await _mediator.Send(command);
@@ -45,7 +42,6 @@ public class AircraftController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> UpdateAircraft(int id, [FromBody] UpdateAircraftCommand command)
     {
         if (id != command.Id)
@@ -56,10 +52,9 @@ public class AircraftController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> DeleteAircraft(int id)
     {
-        var command = new DeleteAircraftCommand { Id = id };
+        var command = new DeleteAircraftCommand(id);
         await _mediator.Send(command);
         return NoContent();
     }

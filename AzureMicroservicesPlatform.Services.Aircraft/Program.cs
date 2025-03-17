@@ -1,15 +1,12 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Identity.Web;
-using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore;
-using EnterpriseApiIntegration.Infrastructure.Persistence;
+using AzureMicroservicesPlatform.Services.Aircraft.Application;
 using EnterpriseApiIntegration.Domain.Aircraft;
-using EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
 using EnterpriseApiIntegration.Infrastructure;
-using MediatR;
-using Swashbuckle.AspNetCore.SwaggerUI;
-using Swashbuckle.AspNetCore.Annotations;
-using Swashbuckle.AspNetCore.Newtonsoft;
+using EnterpriseApiIntegration.Infrastructure.Persistence;
+using EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,52 +42,67 @@ builder.Services.AddDbContext<WriteDbContext>(options =>
 builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
-// Register MediatR and handlers
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(ApplicationDbContext).Assembly);
-});
+// Register Application Services
+builder.Services.AddApplicationServices();
 
 // Configure Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("MicrosoftEntraId"));
+    .AddJwtBearer(options =>
+    {
+        options.Authority = builder.Configuration["MicrosoftEntraId:Instance"] + builder.Configuration["MicrosoftEntraId:TenantId"];
+        options.Audience = builder.Configuration["MicrosoftEntraId:Audience"];
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            RequireExpirationTime = true,
+            RequireSignedTokens = true
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnAuthenticationFailed = context =>
+            {
+                if (context.Exception.GetType() == typeof(Microsoft.IdentityModel.Tokens.SecurityTokenExpiredException))
+                {
+                    context.Response.Headers.Add("Token-Expired", "true");
+                    context.Response.StatusCode = 401;
+                }
+                return Task.CompletedTask;
+            },
+            OnChallenge = context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+                var result = JsonSerializer.Serialize(new { error = "Authentication failed" });
+                return context.Response.WriteAsync(result);
+            }
+        };
+    });
 
 // Configure Authorization
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("RequireAdminRole", policy =>
-        policy.RequireClaim("roles", "Admin"));
-    options.AddPolicy("RequireInternalUserRole", policy =>
-        policy.RequireClaim("roles", "Admin", "InternalUser"));
+    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
 });
 
-// Configure Swagger/OpenAPI
+// Configure Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "Aircraft Service API",
-        Version = "v1",
-        Description = "API for managing aircraft-related operations and customer interactions",
-        Contact = new OpenApiContact
-        {
-            Name = "API Support",
-            Email = "support@aircraftservice.com"
-        }
-    });
-
-    // Configure Swagger to use JWT Authentication
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Aircraft API", Version = "v1" });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Description = "JWT Authorization header using the Bearer scheme",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
-
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -105,34 +117,26 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
-
-    // Enable annotations for more detailed API documentation
-    c.EnableAnnotations();
-
-    // Use fully qualified schema names to prevent conflicts
-    c.CustomSchemaIds(type => type.FullName);
 });
-
-// Configure Swagger middleware with additional options
-builder.Services.AddSwaggerGenNewtonsoftSupport(); // For better JSON handling
-
-// Add health checks
-builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aircraft API V1");
+        c.RoutePrefix = string.Empty;
+        c.DocumentTitle = "Aircraft API Documentation";
+    });
 }
 
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
-app.MapHealthChecks("/health");
 
 app.Run();
 

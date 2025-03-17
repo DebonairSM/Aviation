@@ -43,7 +43,8 @@ public class InMemoryServiceBus : IInMemoryServiceBus
     {
         if (_subscribers.TryGetValue(topic, out var handlers))
         {
-            handlers.RemoveAll(h => h == (message => handler((T)message)));
+            // Remove handlers that match the type and signature
+            handlers.RemoveAll(h => h.Method.GetGenericArguments()[0] == typeof(T));
         }
         return Task.CompletedTask;
     }
