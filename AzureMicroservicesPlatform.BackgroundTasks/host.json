@@ -4,14 +4,19 @@
         "applicationInsights": {
             "samplingSettings": {
                 "isEnabled": true,
-                "excludedTypes": "Request"
-            }
+                "excludedTypes": "Request",
+                "maxTelemetryItemsPerSecond": 20
+            },
+            "enableLiveMetrics": true,
+            "enableDependencyTracking": true,
+            "enablePerformanceCountersCollection": true
         },
         "logLevel": {
             "default": "Information",
             "Host.Results": "Error",
             "Function": "Information",
-            "Host.Aggregator": "Information"
+            "Host.Aggregator": "Information",
+            "Microsoft": "Information"
         }
     },
     "extensions": {
