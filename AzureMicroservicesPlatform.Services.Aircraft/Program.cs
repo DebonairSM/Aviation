@@ -7,6 +7,9 @@ using EnterpriseApiIntegration.Domain.Aircraft;
 using EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
 using EnterpriseApiIntegration.Infrastructure;
 using MediatR;
+using Swashbuckle.AspNetCore.SwaggerUI;
+using Swashbuckle.AspNetCore.Annotations;
+using Swashbuckle.AspNetCore.Newtonsoft;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,7 +70,17 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Aircraft Service API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Aircraft Service API",
+        Version = "v1",
+        Description = "API for managing aircraft-related operations and customer interactions",
+        Contact = new OpenApiContact
+        {
+            Name = "API Support",
+            Email = "support@aircraftservice.com"
+        }
+    });
 
     // Configure Swagger to use JWT Authentication
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -75,8 +88,9 @@ builder.Services.AddSwaggerGen(c =>
         Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
         Name = "Authorization",
         In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer"
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -93,7 +107,16 @@ builder.Services.AddSwaggerGen(c =>
             Array.Empty<string>()
         }
     });
+
+    // Enable annotations for more detailed API documentation
+    c.EnableAnnotations();
+
+    // Use fully qualified schema names to prevent conflicts
+    c.CustomSchemaIds(type => type.FullName);
 });
+
+// Configure Swagger middleware with additional options
+builder.Services.AddSwaggerGenNewtonsoftSupport(); // For better JSON handling
 
 // Add health checks
 builder.Services.AddHealthChecks();
@@ -103,8 +126,20 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwagger(c =>
+    {
+        c.SerializeAsV2 = false; // Use OpenAPI 3.0
+        c.RouteTemplate = "swagger/{documentName}/swagger.json";
+    });
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aircraft Service API v1");
+        c.RoutePrefix = "swagger";
+        c.DocExpansion(DocExpansion.List);
+        c.DefaultModelsExpandDepth(2);
+        c.EnableDeepLinking();
+        c.DisplayRequestDuration();
+    });
 }
 
 app.UseHttpsRedirection();

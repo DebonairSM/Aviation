@@ -16,6 +16,8 @@
     <PackageReference Include="Microsoft.Identity.Web" Version="2.16.1" />
     <PackageReference Include="Microsoft.Identity.Web.UI" Version="2.16.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.5.0" />
   </ItemGroup>
 
   <ItemGroup>
