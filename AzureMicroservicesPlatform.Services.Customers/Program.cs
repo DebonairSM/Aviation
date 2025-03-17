@@ -14,7 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Configure URLs and Ports
 builder.WebHost.ConfigureKestrel(serverOptions =>
 {
-    serverOptions.ListenAnyIP(builder.Configuration.GetValue<int>("Port", 5003));
+    serverOptions.ListenAnyIP(builder.Configuration.GetValue<int>("Port", 5001));
 });
 
 // Add services to the container.
@@ -130,4 +130,9 @@ app.Run();
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
     public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+}
+
+namespace AzureMicroservicesPlatform.Services.Customers
+{
+    public partial class Program { }
 }

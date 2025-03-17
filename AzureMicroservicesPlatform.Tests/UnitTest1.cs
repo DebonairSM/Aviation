@@ -1,14 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
+using AzureMicroservicesPlatform.Services.Customers;
 
 namespace AzureMicroservicesPlatform.Tests.Integration;
 
-public class WeatherForecastApiTests : IClassFixture<WebApplicationFactory<Program>>
+public class WeatherForecastApiTests : IClassFixture<WebApplicationFactory<AzureMicroservicesPlatform.Services.Customers.Program>>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly WebApplicationFactory<AzureMicroservicesPlatform.Services.Customers.Program> _factory;
 
-    public WeatherForecastApiTests(WebApplicationFactory<Program> factory)
+    public WeatherForecastApiTests(WebApplicationFactory<AzureMicroservicesPlatform.Services.Customers.Program> factory)
     {
         _factory = factory;
     }
