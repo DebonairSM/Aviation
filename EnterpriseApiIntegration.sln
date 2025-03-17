@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.Services.Aircraft", "AzureMicroservicesPlatform.Services.Aircraft\AzureMicroservicesPlatform.Services.Aircraft.csproj", "{35AD65B7-EF74-03D6-3128-8B501CA72F9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.BackgroundTasks", "AzureMicroservicesPlatform.BackgroundTasks\AzureMicroservicesPlatform.BackgroundTasks.csproj", "{AA3CE373-4B02-4221-94EE-C8835428A95B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,18 @@ Global
 		{35AD65B7-EF74-03D6-3128-8B501CA72F9E}.Release|x64.Build.0 = Release|Any CPU
 		{35AD65B7-EF74-03D6-3128-8B501CA72F9E}.Release|x86.ActiveCfg = Release|Any CPU
 		{35AD65B7-EF74-03D6-3128-8B501CA72F9E}.Release|x86.Build.0 = Release|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Debug|x64.Build.0 = Debug|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Debug|x86.Build.0 = Debug|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Release|x64.ActiveCfg = Release|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Release|x64.Build.0 = Release|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Release|x86.ActiveCfg = Release|Any CPU
+		{AA3CE373-4B02-4221-94EE-C8835428A95B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
