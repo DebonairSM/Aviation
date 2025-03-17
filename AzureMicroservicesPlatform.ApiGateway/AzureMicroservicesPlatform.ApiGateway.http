@@ -1,6 +1,0 @@
-@AzureMicroservicesPlatform.ApiGateway_HostAddress = http://localhost:5240
-
-GET {{AzureMicroservicesPlatform.ApiGateway_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

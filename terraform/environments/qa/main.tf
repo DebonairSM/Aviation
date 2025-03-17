@@ -16,7 +16,7 @@ module "web_apps" {
   source = "../../modules/app-service"
 
   environment          = "qa"
-  resource_group      = "rg-aviation-qa"
+  resource_group      = "aviation-rg"
   location            = "eastus2"
   app_service_plan_sku = "B1"
 
@@ -24,28 +24,28 @@ module "web_apps" {
     identity = {
       name = "aviation-identity-qa"
       settings = {
-        "KeyVaultName" = "kv-aviation-qa"
+        "KeyVaultName" = "vsol-aviation-kv"
         "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }
     aircraft = {
       name = "aviation-aircraft-qa"
       settings = {
-        "KeyVaultName" = "kv-aviation-qa"
+        "KeyVaultName" = "vsol-aviation-kv"
         "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }
     customers = {
       name = "aviation-customers-qa"
       settings = {
-        "KeyVaultName" = "kv-aviation-qa"
+        "KeyVaultName" = "vsol-aviation-kv"
         "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }
     subscriptions = {
       name = "aviation-subscriptions-qa"
       settings = {
-        "KeyVaultName" = "kv-aviation-qa"
+        "KeyVaultName" = "vsol-aviation-kv"
         "ASPNETCORE_ENVIRONMENT" = "QA"
       }
     }

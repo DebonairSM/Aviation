@@ -21,13 +21,9 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();
 
-// Configure Database - Use configuration based on environment
-var connectionString = builder.Environment.IsDevelopment() 
-    ? builder.Configuration.GetConnectionString("DefaultConnection")
-    : builder.Configuration.GetConnectionString("DockerConnection");
-
+// Add DbContext
 builder.Services.AddDbContext<WriteDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register MediatR and Application Services
 builder.Services.AddCustomerServices();
@@ -97,8 +93,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();

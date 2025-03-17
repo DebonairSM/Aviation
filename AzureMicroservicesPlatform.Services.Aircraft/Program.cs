@@ -24,9 +24,7 @@ builder.WebHost.ConfigureKestrel(serverOptions =>
 builder.Services.AddControllers();
 
 // Configure Database
-var connectionString = builder.Environment.IsDevelopment() 
-    ? builder.Configuration.GetConnectionString("DefaultConnection")
-    : builder.Configuration.GetConnectionString("DockerConnection");
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Register DbContexts
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -126,25 +124,10 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(c =>
-    {
-        c.SerializeAsV2 = false; // Use OpenAPI 3.0
-        c.RouteTemplate = "swagger/{documentName}/swagger.json";
-    });
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aircraft Service API v1");
-        c.RoutePrefix = "swagger";
-        c.DocExpansion(DocExpansion.List);
-        c.DefaultModelsExpandDepth(2);
-        c.EnableDeepLinking();
-        c.DisplayRequestDuration();
-    });
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
-// Add authentication & authorization to the request pipeline
 app.UseAuthentication();
 app.UseAuthorization();
 
