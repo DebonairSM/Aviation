@@ -8,8 +8,11 @@ terraform {
 }
 
 provider "azurerm" {
+  subscription_id = var.subscription_id
+  tenant_id       = var.tenant_id
+  client_id       = var.client_id
+  client_secret   = var.client_secret
   features {}
-  skip_provider_registration = true
 }
 
 module "web_apps" {
@@ -17,8 +20,8 @@ module "web_apps" {
 
   environment          = "qa"
   resource_group      = "aviation-rg"
-  location            = "eastus2"
-  app_service_plan_sku = "B1"
+  location            = "westus"
+  app_service_plan_sku = "F1"
 
   apps = {
     identity = {
@@ -50,6 +53,19 @@ module "web_apps" {
       }
     }
   }
+
+  tags = {
+    Environment = "QA"
+    ManagedBy   = "Terraform"
+    Project     = "Aviation"
+  }
+}
+
+module "api_management" {
+  source = "../../modules/api-management"
+
+  location            = "westus"
+  resource_group_name = "aviation-rg"
 
   tags = {
     Environment = "QA"

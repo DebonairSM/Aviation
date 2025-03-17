@@ -38,4 +38,9 @@ tags = {
   Environment = "QA"
   ManagedBy = "Terraform"
   Project = "Aviation"
-} 
+}
+
+subscription_id = "08398d64-5d63-4da9-8daf-e15b00f4d227"
+tenant_id       = "621db766-1ccd-40f1-80b0-ef469bd8f081"
+client_id       = "e96126b4-d4f9-4716-adac-afa697eee97d"
+client_secret   = "cVs8Q~KqdWhBZARCdcCHa6IGqHQiDQG8O2_sgb5o" 

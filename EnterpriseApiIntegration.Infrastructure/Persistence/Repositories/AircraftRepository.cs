@@ -1,10 +1,28 @@
 using EnterpriseApiIntegration.Domain.Aircraft;
+using EnterpriseApiIntegration.Application.Features.Aircraft.FakeData;
 
 namespace EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
 
 public class AircraftRepository : IAircraftRepository
 {
     private readonly ApplicationDbContext _context;
+    private static readonly List<Aircraft> _demoData = AircraftFaker.CreateAircraftFaker()
+        .Generate(10)
+        .Select(dto => new Aircraft
+        {
+            Id = dto.Id,
+            Registration = dto.Registration,
+            Type = dto.Type,
+            Manufacturer = dto.Manufacturer,
+            Model = dto.Model,
+            YearOfManufacture = dto.YearOfManufacture,
+            SerialNumber = dto.SerialNumber,
+            Status = dto.Status,
+            LastMaintenanceDate = dto.LastMaintenanceDate,
+            NextMaintenanceDue = dto.NextMaintenanceDue,
+            TotalFlightHours = dto.TotalFlightHours
+        })
+        .ToList();
 
     public AircraftRepository(ApplicationDbContext context)
     {
@@ -13,75 +31,39 @@ public class AircraftRepository : IAircraftRepository
 
     public async Task<Aircraft> GetByIdAsync(int id)
     {
-        // Demo implementation
-        return new Aircraft
-        {
-            Id = id,
-            Registration = "N12345",
-            Type = "Commercial",
-            Manufacturer = "Boeing",
-            Model = "737-800",
-            YearOfManufacture = 2020,
-            SerialNumber = "12345",
-            Status = "Active",
-            LastMaintenanceDate = DateTime.Now.AddMonths(-3),
-            NextMaintenanceDue = DateTime.Now.AddMonths(3),
-            TotalFlightHours = 5000
-        };
+        return await Task.FromResult(_demoData.FirstOrDefault(a => a.Id == id));
     }
 
     public async Task<IEnumerable<Aircraft>> GetAllAsync()
     {
-        // Demo implementation
-        return new List<Aircraft>
-        {
-            new Aircraft
-            {
-                Id = 1,
-                Registration = "N12345",
-                Type = "Commercial",
-                Manufacturer = "Boeing",
-                Model = "737-800",
-                YearOfManufacture = 2020,
-                SerialNumber = "12345",
-                Status = "Active",
-                LastMaintenanceDate = DateTime.Now.AddMonths(-3),
-                NextMaintenanceDue = DateTime.Now.AddMonths(3),
-                TotalFlightHours = 5000
-            },
-            new Aircraft
-            {
-                Id = 2,
-                Registration = "N54321",
-                Type = "Commercial",
-                Manufacturer = "Airbus",
-                Model = "A320",
-                YearOfManufacture = 2019,
-                SerialNumber = "54321",
-                Status = "Active",
-                LastMaintenanceDate = DateTime.Now.AddMonths(-2),
-                NextMaintenanceDue = DateTime.Now.AddMonths(4),
-                TotalFlightHours = 4000
-            }
-        };
+        return await Task.FromResult(_demoData);
     }
 
     public async Task<Aircraft> AddAsync(Aircraft aircraft)
     {
-        // Demo implementation
-        aircraft.Id = 3;
-        return aircraft;
+        aircraft.Id = _demoData.Max(a => a.Id) + 1;
+        _demoData.Add(aircraft);
+        return await Task.FromResult(aircraft);
     }
 
     public async Task<Aircraft> UpdateAsync(Aircraft aircraft)
     {
-        // Demo implementation
-        return aircraft;
+        var existingAircraft = _demoData.FirstOrDefault(a => a.Id == aircraft.Id);
+        if (existingAircraft != null)
+        {
+            var index = _demoData.IndexOf(existingAircraft);
+            _demoData[index] = aircraft;
+        }
+        return await Task.FromResult(aircraft);
     }
 
     public async Task DeleteAsync(int id)
     {
-        // Demo implementation
+        var aircraft = _demoData.FirstOrDefault(a => a.Id == id);
+        if (aircraft != null)
+        {
+            _demoData.Remove(aircraft);
+        }
         await Task.CompletedTask;
     }
 } 

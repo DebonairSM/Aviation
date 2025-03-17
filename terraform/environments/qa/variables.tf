@@ -29,4 +29,25 @@ variable "apps" {
 variable "tags" {
   description = "Tags to apply to all resources"
   type        = map(string)
+}
+
+variable "subscription_id" {
+  description = "The Azure Subscription ID"
+  type        = string
+}
+
+variable "tenant_id" {
+  description = "The Azure Tenant ID"
+  type        = string
+}
+
+variable "client_id" {
+  description = "The Azure Client ID"
+  type        = string
+}
+
+variable "client_secret" {
+  description = "The Azure Client Secret"
+  type        = string
+  sensitive   = true
 } 

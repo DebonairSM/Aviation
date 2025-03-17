@@ -1,0 +1,7 @@
+{
+  "ApiScope": "access_as_user",
+  "ApiId": "api://e96126b4-d4f9-4716-adac-afa697eee97d",
+  "TenantId": "621db766-1ccd-40f1-80b0-ef469bd8f081",
+  "ClientId": "e96126b4-d4f9-4716-adac-afa697eee97d",
+  "ClientSecret": null
+}

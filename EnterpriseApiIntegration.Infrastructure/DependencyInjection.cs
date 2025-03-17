@@ -2,6 +2,7 @@ using System.Reflection;
 using EnterpriseApiIntegration.Domain.Aircraft;
 using EnterpriseApiIntegration.Infrastructure.Persistence;
 using EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
+using EnterpriseApiIntegration.Infrastructure.ServiceBus;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,9 @@ public static class DependencyInjection
 
         // Register repositories
         services.AddScoped<IAircraftRepository, AircraftRepository>();
+
+        // Register in-memory service bus for local development
+        services.AddSingleton<IInMemoryServiceBus, InMemoryServiceBus>();
 
         return services;
     }
