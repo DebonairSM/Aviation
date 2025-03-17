@@ -2,16 +2,16 @@ using MediatR;
 
 namespace EnterpriseApiIntegration.Application.Features.Customers.Commands;
 
-public record DeleteCustomerCommand : IRequest
+public class DeleteCustomerCommand : IRequest<bool>
 {
-    public int Id { get; init; }
-}
+    public required string Id { get; set; }
 
-public class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerCommand>
-{
-    public async Task Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
+    public class Handler : IRequestHandler<DeleteCustomerCommand, bool>
     {
-        // Demo implementation - would typically delete from database
-        await Task.CompletedTask;
+        public async Task<bool> Handle(DeleteCustomerCommand request, CancellationToken cancellationToken)
+        {
+            // TODO: Replace with actual data access
+            return true;
+        }
     }
 } 

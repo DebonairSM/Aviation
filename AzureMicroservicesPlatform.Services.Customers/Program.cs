@@ -1,16 +1,58 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
+using EnterpriseApiIntegration.Application;
+using EnterpriseApiIntegration.Infrastructure;
+using EnterpriseApiIntegration.Domain.Customers;
+using EnterpriseApiIntegration.Infrastructure.Persistence;
+using EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configure URLs and Ports
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(builder.Configuration.GetValue<int>("Port", 5003));
+});
 
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddControllers();
 
+// Configure Database - Use configuration based on environment
+var connectionString = builder.Environment.IsDevelopment() 
+    ? builder.Configuration.GetConnectionString("DefaultConnection")
+    : builder.Configuration.GetConnectionString("DockerConnection");
+
+builder.Services.AddDbContext<WriteDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Register MediatR and Application Services
+builder.Services.AddCustomerServices();
+
+// Register Infrastructure Services
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IMediator, Mediator>();
+
+// Add MediatR services
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+});
+
 // Configure authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("MicrosoftEntraId"));
+
+// Configure authorization policies
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy =>
+        policy.RequireClaim("roles", "Admin"));
+    options.AddPolicy("RequireInternalUserRole", policy =>
+        policy.RequireClaim("roles", "Admin", "InternalUser"));
+});
 
 // Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();

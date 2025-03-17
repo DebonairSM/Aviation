@@ -10,6 +10,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    networks:
+      - aviation-network
     depends_on:
       customers-service:
         condition: service_started
@@ -29,6 +31,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    networks:
+      - aviation-network
     depends_on:
       db:
         condition: service_started
@@ -42,6 +46,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    networks:
+      - aviation-network
     depends_on:
       db:
         condition: service_started
@@ -55,6 +61,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=db;Database=AviationDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;
+    networks:
+      - aviation-network
     depends_on:
       db:
         condition: service_started
@@ -68,8 +76,14 @@ services:
       - "MSSQL_PID=Developer"
     ports:
       - "1433:1433"
+    networks:
+      - aviation-network
     volumes:
       - sqldata:/var/opt/mssql
+
+networks:
+  aviation-network:
+    driver: bridge
 
 volumes:
   sqldata: 

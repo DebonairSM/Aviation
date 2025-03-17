@@ -1,37 +1,66 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
-using EnterpriseApiIntegration.Application.Features.Aircraft;
-using EnterpriseApiIntegration.Application;
+using Microsoft.EntityFrameworkCore;
+using EnterpriseApiIntegration.Infrastructure.Persistence;
+using EnterpriseApiIntegration.Domain.Aircraft;
+using EnterpriseApiIntegration.Infrastructure.Persistence.Repositories;
 using EnterpriseApiIntegration.Infrastructure;
+using MediatR;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddControllers();
-
-// Add Application and Infrastructure services
-builder.Services.AddApplicationServices();
-builder.Services.AddInfrastructureServices(builder.Configuration);
-
-// Add MediatR
-builder.Services.AddMediatR(cfg => {
-    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(AircraftDto).Assembly);
+// Configure URLs and Ports
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    var port = builder.Configuration.GetValue<int>("Port", 5002);
+    serverOptions.ListenAnyIP(port);
 });
 
-// Configure authentication
+// Add services to the container
+builder.Services.AddControllers();
+
+// Configure Database
+var connectionString = builder.Environment.IsDevelopment() 
+    ? builder.Configuration.GetConnectionString("DefaultConnection")
+    : builder.Configuration.GetConnectionString("DockerConnection");
+
+// Register DbContexts
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString,
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null)));
+
+builder.Services.AddDbContext<WriteDbContext>(options =>
+    options.UseSqlServer(connectionString,
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null)));
+
+// Register Infrastructure Services
+builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+
+// Register MediatR and handlers
+builder.Services.AddMediatR(cfg => {
+    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(ApplicationDbContext).Assembly);
+});
+
+// Configure Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("MicrosoftEntraId"));
 
-// Configure authorization policies
+// Configure Authorization
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdminRole", policy =>
-        policy.RequireRole("Admin"));
+        policy.RequireClaim("roles", "Admin"));
     options.AddPolicy("RequireInternalUserRole", policy =>
-        policy.RequireRole("Admin", "InternalUser"));
+        policy.RequireClaim("roles", "Admin", "InternalUser"));
 });
 
 // Configure Swagger/OpenAPI
@@ -40,7 +69,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "Aircraft Service API", Version = "v1" });
 
-    // Add JWT bearer authentication
+    // Configure Swagger to use JWT Authentication
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
@@ -80,6 +109,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Add authentication & authorization to the request pipeline
 app.UseAuthentication();
 app.UseAuthorization();
 

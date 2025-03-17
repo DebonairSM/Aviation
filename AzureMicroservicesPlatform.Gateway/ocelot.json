@@ -2,11 +2,11 @@
   "Routes": [
     {
       "DownstreamPathTemplate": "/api/aircraft/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44301
+          "Port": 5002
         }
       ],
       "UpstreamPathTemplate": "/api/aircraft/{everything}",
@@ -14,24 +14,12 @@
       "SwaggerKey": "aircraft"
     },
     {
-      "DownstreamPathTemplate": "/swagger/{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 44301
-        }
-      ],
-      "UpstreamPathTemplate": "/swagger/aircraft/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/customers/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44303
+          "Port": 5001
         }
       ],
       "UpstreamPathTemplate": "/api/customers/{everything}",
@@ -39,41 +27,17 @@
       "SwaggerKey": "customers"
     },
     {
-      "DownstreamPathTemplate": "/swagger/{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 44303
-        }
-      ],
-      "UpstreamPathTemplate": "/swagger/customers/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    {
       "DownstreamPathTemplate": "/api/subscriptions/{everything}",
-      "DownstreamScheme": "https",
+      "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
           "Host": "localhost",
-          "Port": 44304
+          "Port": 5003
         }
       ],
       "UpstreamPathTemplate": "/api/subscriptions/{everything}",
       "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
       "SwaggerKey": "subscriptions"
-    },
-    {
-      "DownstreamPathTemplate": "/swagger/{everything}",
-      "DownstreamScheme": "https",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 44304
-        }
-      ],
-      "UpstreamPathTemplate": "/swagger/subscriptions/{everything}",
-      "UpstreamHttpMethod": [ "GET" ]
     }
   ],
   "SwaggerEndPoints": [
@@ -83,7 +47,7 @@
         {
           "Name": "Aircraft API",
           "Version": "v1",
-          "Url": "https://localhost:44301/swagger/v1/swagger.json"
+          "Url": "http://localhost:5002/swagger/v1/swagger.json"
         }
       ]
     },
@@ -93,7 +57,7 @@
         {
           "Name": "Customers API",
           "Version": "v1",
-          "Url": "https://localhost:44303/swagger/v1/swagger.json"
+          "Url": "http://localhost:5001/swagger/v1/swagger.json"
         }
       ]
     },
@@ -103,12 +67,12 @@
         {
           "Name": "Subscriptions API",
           "Version": "v1",
-          "Url": "https://localhost:44304/swagger/v1/swagger.json"
+          "Url": "http://localhost:5003/swagger/v1/swagger.json"
         }
       ]
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "https://localhost:44380"
+    "BaseUrl": "http://localhost:5000"
   }
 } 

@@ -2,27 +2,30 @@ using MediatR;
 
 namespace EnterpriseApiIntegration.Application.Features.Customers.Queries;
 
-public record GetCustomerByIdQuery : IRequest<CustomerDto?>
+public class GetCustomerByIdQuery : IRequest<CustomerDto?>
 {
-    public int Id { get; init; }
-}
+    public string Id { get; set; }
 
-public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, CustomerDto?>
-{
-    public async Task<CustomerDto?> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
+    public class Handler : IRequestHandler<GetCustomerByIdQuery, CustomerDto?>
     {
-        // Demo implementation
-        if (request.Id == 1)
+        public async Task<CustomerDto?> Handle(GetCustomerByIdQuery request, CancellationToken cancellationToken)
         {
-            return new CustomerDto
+            // TODO: Replace with actual data access
+            if (request.Id == "1")
             {
-                Id = 1,
-                Name = "Demo Customer 1",
-                Email = "demo1@example.com",
-                Phone = "123-456-7890"
-            };
-        }
+                return new CustomerDto
+                {
+                    Id = request.Id,
+                    Name = "John Doe",
+                    Email = "john@example.com",
+                    PhoneNumber = "+1234567890",
+                    CompanyName = "Aviation Corp",
+                    Role = "Customer",
+                    CreatedAt = DateTime.UtcNow
+                };
+            }
 
-        return null;
+            return null;
+        }
     }
 } 

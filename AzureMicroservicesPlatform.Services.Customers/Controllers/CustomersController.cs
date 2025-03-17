@@ -30,7 +30,7 @@ public class CustomersController : ControllerBase
 
     [HttpGet("{id}")]
     [Authorize(Policy = "RequireInternalUserRole")]
-    public async Task<IActionResult> GetCustomer(int id)
+    public async Task<IActionResult> GetCustomer(string id)
     {
         var query = new GetCustomerByIdQuery { Id = id };
         var result = await _mediator.Send(query);
@@ -41,13 +41,13 @@ public class CustomersController : ControllerBase
     [Authorize(Policy = "RequireAdminRole")]
     public async Task<IActionResult> CreateCustomer([FromBody] CreateCustomerCommand command)
     {
-        var result = await _mediator.Send(command);
-        return CreatedAtAction(nameof(GetCustomer), new { id = result }, result);
+        var customerId = await _mediator.Send(command);
+        return CreatedAtAction(nameof(GetCustomer), new { id = customerId.ToString() }, customerId);
     }
 
     [HttpPut("{id}")]
     [Authorize(Policy = "RequireAdminRole")]
-    public async Task<IActionResult> UpdateCustomer(int id, [FromBody] UpdateCustomerCommand command)
+    public async Task<IActionResult> UpdateCustomer(string id, [FromBody] UpdateCustomerCommand command)
     {
         if (id != command.Id)
             return BadRequest();
@@ -58,7 +58,7 @@ public class CustomersController : ControllerBase
 
     [HttpDelete("{id}")]
     [Authorize(Policy = "RequireAdminRole")]
-    public async Task<IActionResult> DeleteCustomer(int id)
+    public async Task<IActionResult> DeleteCustomer(string id)
     {
         var command = new DeleteCustomerCommand { Id = id };
         await _mediator.Send(command);

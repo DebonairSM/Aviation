@@ -1,18 +1,38 @@
 using MediatR;
+using EnterpriseApiIntegration.Application.Features.Customers;
 
 namespace EnterpriseApiIntegration.Application.Features.Customers.Queries;
 
-public record GetCustomersQuery : IRequest<IEnumerable<CustomerDto>>;
-
-public class GetCustomersQueryHandler : IRequestHandler<GetCustomersQuery, IEnumerable<CustomerDto>>
+public class GetCustomersQuery : IRequest<IEnumerable<CustomerDto>>
 {
-    public async Task<IEnumerable<CustomerDto>> Handle(GetCustomersQuery request, CancellationToken cancellationToken)
+    public class Handler : IRequestHandler<GetCustomersQuery, IEnumerable<CustomerDto>>
     {
-        // Demo implementation
-        return new List<CustomerDto>
+        public async Task<IEnumerable<CustomerDto>> Handle(GetCustomersQuery request, CancellationToken cancellationToken)
         {
-            new() { Id = 1, Name = "Demo Customer 1", Email = "demo1@example.com", Phone = "123-456-7890" },
-            new() { Id = 2, Name = "Demo Customer 2", Email = "demo2@example.com", Phone = "098-765-4321" }
-        };
+            // TODO: Replace with actual data access
+            return new List<CustomerDto>
+            {
+                new CustomerDto 
+                { 
+                    Id = "1", 
+                    Name = "John Doe", 
+                    Email = "john@example.com",
+                    PhoneNumber = "+1234567890",
+                    CompanyName = "Aviation Corp",
+                    Role = "Customer",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new CustomerDto 
+                { 
+                    Id = "2", 
+                    Name = "Jane Smith", 
+                    Email = "jane@example.com",
+                    PhoneNumber = "+0987654321",
+                    CompanyName = "Sky Ltd",
+                    Role = "VIP",
+                    CreatedAt = DateTime.UtcNow
+                }
+            };
+        }
     }
 } 

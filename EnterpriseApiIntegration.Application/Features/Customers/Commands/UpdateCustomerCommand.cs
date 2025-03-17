@@ -2,25 +2,31 @@ using MediatR;
 
 namespace EnterpriseApiIntegration.Application.Features.Customers.Commands;
 
-public record UpdateCustomerCommand : IRequest<CustomerDto>
+public class UpdateCustomerCommand : IRequest<CustomerDto>
 {
-    public int Id { get; init; }
-    public string Name { get; init; } = string.Empty;
-    public string Email { get; init; } = string.Empty;
-    public string Phone { get; init; } = string.Empty;
-}
+    public string Id { get; set; }
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public string PhoneNumber { get; set; }
+    public string CompanyName { get; set; }
+    public string Role { get; set; }
 
-public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerCommand, CustomerDto>
-{
-    public async Task<CustomerDto> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
+    public class Handler : IRequestHandler<UpdateCustomerCommand, CustomerDto>
     {
-        // Demo implementation
-        return new CustomerDto
+        public async Task<CustomerDto> Handle(UpdateCustomerCommand request, CancellationToken cancellationToken)
         {
-            Id = request.Id,
-            Name = request.Name,
-            Email = request.Email,
-            Phone = request.Phone
-        };
+            // TODO: Replace with actual data access
+            return new CustomerDto
+            {
+                Id = request.Id,
+                Name = request.Name,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                CompanyName = request.CompanyName,
+                Role = request.Role,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
     }
 } 

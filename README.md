@@ -361,8 +361,8 @@ To deploy or update infrastructure:
 1. **Development**:
    ```bash
    cd terraform/environments/dev
-   terraform init
-   terraform plan
+        terraform init
+        terraform plan
    terraform apply
    ```
 
@@ -372,7 +372,7 @@ To deploy or update infrastructure:
    terraform init
    terraform plan
    terraform apply
-   ```
+```
 
 ### Best Practices
 
