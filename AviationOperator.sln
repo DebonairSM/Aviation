@@ -3,27 +3,29 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnterpriseApiIntegration.Tests", "EnterpriseApiIntegration.Tests\EnterpriseApiIntegration.Tests.csproj", "{2310851F-E1E6-4588-A1B8-D248835333BB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enterprise.Tests", "EnterpriseApiIntegration.Tests\Enterprise.Tests.csproj", "{2310851F-E1E6-4588-A1B8-D248835333BB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnterpriseApiIntegration.Domain", "EnterpriseApiIntegration.Domain\EnterpriseApiIntegration.Domain.csproj", "{7D7EE40B-3070-46AC-B756-B03BA9B04ECE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enterprise.Domain", "EnterpriseApiIntegration.Domain\Enterprise.Domain.csproj", "{7D7EE40B-3070-46AC-B756-B03BA9B04ECE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnterpriseApiIntegration.Infrastructure", "EnterpriseApiIntegration.Infrastructure\EnterpriseApiIntegration.Infrastructure.csproj", "{F59B8C37-781C-4251-83A7-188ABAEE5AB0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enterprise.Infrastructure", "EnterpriseApiIntegration.Infrastructure\Enterprise.Infrastructure.csproj", "{F59B8C37-781C-4251-83A7-188ABAEE5AB0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnterpriseApiIntegration.Application", "EnterpriseApiIntegration.Application\EnterpriseApiIntegration.Application.csproj", "{07A291F6-078E-4329-9D89-F6FFD37E2963}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Enterprise.Application", "EnterpriseApiIntegration.Application\Enterprise.Application.csproj", "{07A291F6-078E-4329-9D89-F6FFD37E2963}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.Identity", "AzureMicroservicesPlatform.Identity\AzureMicroservicesPlatform.Identity.csproj", "{41C4276E-9574-CC24-7BEF-98D6E0444E00}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Identity", "AzureMicroservicesPlatform.Identity\API.Identity.csproj", "{41C4276E-9574-CC24-7BEF-98D6E0444E00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.Services.Customers", "AzureMicroservicesPlatform.Services.Customers\AzureMicroservicesPlatform.Services.Customers.csproj", "{B79F8716-0827-FC1D-3DE5-69570C3140BE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Gateway", "AzureMicroservicesPlatform.Gateway\API.Gateway.csproj", "{8337BED9-459D-7483-BA8C-717D45EAE112}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.Services.Subscriptions", "AzureMicroservicesPlatform.Services.Subscriptions\AzureMicroservicesPlatform.Services.Subscriptions.csproj", "{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Aircraft", "AzureMicroservicesPlatform.Services.Aircraft\API.Aircraft.csproj", "{35AD65B7-EF74-03D6-3128-8B501CA72F9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.Tests", "AzureMicroservicesPlatform.Tests\AzureMicroservicesPlatform.Tests.csproj", "{07427D0E-876B-850C-7FDD-804079AC96D0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Azure.BackgroundTasks", "AzureMicroservicesPlatform.BackgroundTasks\Azure.BackgroundTasks.csproj", "{AA3CE373-4B02-4221-94EE-C8835428A95B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.Gateway", "AzureMicroservicesPlatform.Gateway\AzureMicroservicesPlatform.Gateway.csproj", "{8337BED9-459D-7483-BA8C-717D45EAE112}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.Services.Aircraft", "AzureMicroservicesPlatform.Services.Aircraft\AzureMicroservicesPlatform.Services.Aircraft.csproj", "{35AD65B7-EF74-03D6-3128-8B501CA72F9E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureMicroservicesPlatform.BackgroundTasks", "AzureMicroservicesPlatform.BackgroundTasks\AzureMicroservicesPlatform.BackgroundTasks.csproj", "{AA3CE373-4B02-4221-94EE-C8835428A95B}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
+	ProjectSection(SolutionItems) = preProject
+		.env = .env
+		azure-config.json = azure-config.json
+		README.md = README.md
+		setup-entra-id.ps1 = setup-entra-id.ps1
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -95,42 +97,6 @@ Global
 		{41C4276E-9574-CC24-7BEF-98D6E0444E00}.Release|x64.Build.0 = Release|Any CPU
 		{41C4276E-9574-CC24-7BEF-98D6E0444E00}.Release|x86.ActiveCfg = Release|Any CPU
 		{41C4276E-9574-CC24-7BEF-98D6E0444E00}.Release|x86.Build.0 = Release|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Debug|x64.Build.0 = Debug|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Debug|x86.Build.0 = Debug|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Release|x64.ActiveCfg = Release|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Release|x64.Build.0 = Release|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Release|x86.ActiveCfg = Release|Any CPU
-		{B79F8716-0827-FC1D-3DE5-69570C3140BE}.Release|x86.Build.0 = Release|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Debug|x64.Build.0 = Debug|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Debug|x86.Build.0 = Debug|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Release|x64.ActiveCfg = Release|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Release|x64.Build.0 = Release|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Release|x86.ActiveCfg = Release|Any CPU
-		{9E4D9798-4CF5-975F-F1F6-EDCD351DE6B6}.Release|x86.Build.0 = Release|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Debug|x64.Build.0 = Debug|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Debug|x86.Build.0 = Debug|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Release|x64.ActiveCfg = Release|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Release|x64.Build.0 = Release|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Release|x86.ActiveCfg = Release|Any CPU
-		{07427D0E-876B-850C-7FDD-804079AC96D0}.Release|x86.Build.0 = Release|Any CPU
 		{8337BED9-459D-7483-BA8C-717D45EAE112}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8337BED9-459D-7483-BA8C-717D45EAE112}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8337BED9-459D-7483-BA8C-717D45EAE112}.Debug|x64.ActiveCfg = Debug|Any CPU

@@ -22,7 +22,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AzureMicroservicesPlatform.Services.Aircraft\AzureMicroservicesPlatform.Services.Aircraft.csproj" />
-    <ProjectReference Include="..\AzureMicroservicesPlatform.Services.Customers\AzureMicroservicesPlatform.Services.Customers.csproj" />
     <ProjectReference Include="..\AzureMicroservicesPlatform.Services.Subscriptions\AzureMicroservicesPlatform.Services.Subscriptions.csproj" />
   </ItemGroup>
 
