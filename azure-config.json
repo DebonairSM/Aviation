@@ -1,5 +1,5 @@
 {
-  "ClientSecret": "Q5.8Q~SOEG4f45FbnvUb3imQg4AMayr3iOZV3alr",
-  "TenantId": "621db766-1ccd-40f1-80b0-ef469bd8f081",
-  "ClientId": "e96126b4-d4f9-4716-adac-afa697eee97d"
+  "ClientSecret": "${AZURE_CLIENT_SECRET}",
+  "TenantId": "${AZURE_TENANT_ID}",
+  "ClientId": "${AZURE_CLIENT_ID}"
 }
