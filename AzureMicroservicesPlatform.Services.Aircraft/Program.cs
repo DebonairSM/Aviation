@@ -10,13 +10,6 @@ using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure URLs and Ports
-builder.WebHost.ConfigureKestrel(serverOptions =>
-{
-    var port = builder.Configuration.GetValue<int>("Port", 5002);
-    serverOptions.ListenAnyIP(port);
-});
-
 // Add services to the container
 builder.Services.AddControllers();
 
@@ -128,12 +121,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Aircraft API V1");
-        c.RoutePrefix = string.Empty;
-        c.DocumentTitle = "Aircraft API Documentation";
+        c.RoutePrefix = "swagger";
     });
 }
 
-app.UseHttpsRedirection();
+// Enable routing and endpoints
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
