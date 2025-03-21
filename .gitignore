@@ -474,3 +474,8 @@ bld/
 TestResults/
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
