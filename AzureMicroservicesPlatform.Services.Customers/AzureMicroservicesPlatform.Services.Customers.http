@@ -1,6 +1,0 @@
-@AzureMicroservicesPlatform.Services.Customers_HostAddress = http://localhost:5034
-
-GET {{AzureMicroservicesPlatform.Services.Customers_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

@@ -1,43 +1,68 @@
 environment = "qa"
-location = "eastus2"
-resource_group = "rg-aviation-qa"
+location = "eastus"
+resource_group_name = "rg-aviation-qa"
 app_service_plan_sku = "B1"
 
-apps = {
-  identity = {
-    name = "aviation-identity-qa"
-    settings = {
-      "ASPNETCORE_ENVIRONMENT" = "Development"
-      "KeyVaultName" = "kv-aviation-qa"
-    }
-  }
+# OAuth2 Configuration
+tenant_id          = "your-tenant-id"
+api_id             = "api://your-api-id"
+client_id          = "your-client-id"
+client_secret      = "your-client-secret"
+scope              = "api://your-api-id/access_as_user"
+authorization_url  = "https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/authorize"
+token_url          = "https://login.microsoftonline.com/your-tenant-id/oauth2/v2.0/token"
+
+# Backend Configuration
+backend_host       = "api.aviation.com"
+
+# API Configuration
+apis = {
   aircraft = {
-    name = "aviation-aircraft-qa"
-    settings = {
-      "ASPNETCORE_ENVIRONMENT" = "Development"
-      "KeyVaultName" = "kv-aviation-qa"
-    }
+    name         = "aircraft-api"
+    display_name = "Aircraft API"
+    path         = "aircraft"
+    protocols    = ["https"]
+    service_url  = "http://localhost:5001"
+    swagger_file = "aircraft.json"
+    is_public    = false
+    requires_auth = true
   }
   customers = {
-    name = "aviation-customers-qa"
-    settings = {
-      "ASPNETCORE_ENVIRONMENT" = "Development"
-      "KeyVaultName" = "kv-aviation-qa"
-    }
+    name         = "customers-api"
+    display_name = "Customers API"
+    path         = "customers"
+    protocols    = ["https"]
+    service_url  = "http://localhost:5003"
+    swagger_file = "customers.json"
+    is_public    = false
+    requires_auth = true
   }
   subscriptions = {
-    name = "aviation-subscriptions-qa"
-    settings = {
-      "ASPNETCORE_ENVIRONMENT" = "Development"
-      "KeyVaultName" = "kv-aviation-qa"
-    }
+    name         = "subscriptions-api"
+    display_name = "Subscriptions API"
+    path         = "subscriptions"
+    protocols    = ["https"]
+    service_url  = "http://localhost:5004"
+    swagger_file = "subscriptions.json"
+    is_public    = false
+    requires_auth = true
+  }
+  identity = {
+    name         = "identity-api"
+    display_name = "Identity API"
+    path         = "identity"
+    protocols    = ["https"]
+    service_url  = "http://localhost:5001"
+    swagger_file = "identity.json"
+    is_public    = true
+    requires_auth = false
   }
 }
 
 tags = {
   Environment = "QA"
-  ManagedBy = "Terraform"
-  Project = "Aviation"
+  ManagedBy   = "Terraform"
+  Project     = "Aviation"
 }
 
 subscription_id = "08398d64-5d63-4da9-8daf-e15b00f4d227"
