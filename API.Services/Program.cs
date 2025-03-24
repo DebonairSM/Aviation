@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
+using System.Reflection;
+using MediatR;
+using Enterprise.Application.Features.Aircraft.Queries;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,10 +36,23 @@ builder.Services.AddDbContext<WriteDbContext>(options =>
 
 // Register Infrastructure Services
 builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
+
+// Register Customer Repository
+builder.Services.AddScoped<Enterprise.Domain.Customers.ICustomerRepository, Enterprise.Infrastructure.Persistence.Repositories.CustomerRepository>();
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
 
 // Register Application Services
 builder.Services.AddApplicationServices();
+
+// Register MediatR - This is crucial for your query handlers
+builder.Services.AddMediatR(cfg => {
+    // Register handlers from API.Services assembly
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+    
+    // Register handlers from Enterprise.Application assembly
+    cfg.RegisterServicesFromAssemblyContaining<GetAircraftQuery>();
+});
 
 // Configure Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -102,9 +118,38 @@ builder.Services.AddSwaggerGen(c =>
     // Add XML comments
     var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    Console.WriteLine($"Looking for XML file at: {xmlPath}");
+    Console.WriteLine($"Base directory: {AppContext.BaseDirectory}");
+    Console.WriteLine($"Current directory: {Directory.GetCurrentDirectory()}");
+    
     if (File.Exists(xmlPath))
     {
         c.IncludeXmlComments(xmlPath);
+        Console.WriteLine($"Successfully included XML comments from: {xmlPath}");
+    }
+    else
+    {
+        Console.WriteLine($"XML file not found at: {xmlPath}");
+        // Try to find the file in the current directory and its subdirectories
+        var currentDir = Directory.GetCurrentDirectory();
+        var files = Directory.GetFiles(currentDir, "*.xml", SearchOption.AllDirectories);
+        Console.WriteLine("Found XML files:");
+        foreach (var file in files)
+        {
+            Console.WriteLine($"- {file}");
+        }
+
+        // Try to find the file in the bin directory
+        var binPath = Path.Combine(currentDir, "bin", "Debug", "net8.0", xmlFile);
+        if (File.Exists(binPath))
+        {
+            c.IncludeXmlComments(binPath);
+            Console.WriteLine($"Successfully included XML comments from bin directory: {binPath}");
+        }
+        else
+        {
+            Console.WriteLine($"XML file not found in bin directory: {binPath}");
+        }
     }
 
     // Configure JWT Authentication

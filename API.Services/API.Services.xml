@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>API.Services</name>
+    </assembly>
+    <members>
+        <member name="T:AzureMicroservicesPlatform.Services.Aircraft.Controllers.AircraftController">
+            <summary>
+            Controller for managing aircraft information
+            </summary>
+        </member>
+        <member name="M:AzureMicroservicesPlatform.Services.Aircraft.Controllers.AircraftController.GetAll">
+            <summary>
+            Gets all aircraft in the system
+            </summary>
+            <returns>List of all aircraft</returns>
+            <response code="200">Returns the list of aircraft</response>
+            <response code="401">If the user is not authenticated</response>
+        </member>
+        <member name="M:AzureMicroservicesPlatform.Services.Aircraft.Controllers.AircraftController.GetById(System.Guid)">
+            <summary>
+            Gets a specific aircraft by ID
+            </summary>
+            <param name="id">The ID of the aircraft to retrieve</param>
+            <returns>The requested aircraft</returns>
+            <response code="200">Returns the requested aircraft</response>
+            <response code="401">If the user is not authenticated</response>
+            <response code="404">If the aircraft is not found</response>
+        </member>
+        <member name="M:AzureMicroservicesPlatform.Services.Aircraft.Controllers.AircraftController.Create(Enterprise.Application.Features.Aircraft.Commands.CreateAircraftCommand)">
+            <summary>
+            Creates a new aircraft
+            </summary>
+            <param name="command">The aircraft creation command</param>
+            <returns>The newly created aircraft</returns>
+            <response code="201">Returns the newly created aircraft</response>
+            <response code="400">If the command is invalid</response>
+            <response code="401">If the user is not authenticated</response>
+        </member>
+        <member name="M:AzureMicroservicesPlatform.Services.Aircraft.Controllers.AircraftController.Update(System.Guid,Enterprise.Application.Features.Aircraft.Commands.UpdateAircraftCommand)">
+            <summary>
+            Updates an existing aircraft
+            </summary>
+            <param name="id">The ID of the aircraft to update</param>
+            <param name="command">The aircraft update command</param>
+            <returns>The updated aircraft</returns>
+            <response code="200">Returns the updated aircraft</response>
+            <response code="400">If the command is invalid or IDs don't match</response>
+            <response code="401">If the user is not authenticated</response>
+            <response code="404">If the aircraft is not found</response>
+        </member>
+        <member name="M:AzureMicroservicesPlatform.Services.Aircraft.Controllers.AircraftController.Delete(System.Guid)">
+            <summary>
+            Deletes an aircraft
+            </summary>
+            <param name="id">The ID of the aircraft to delete</param>
+            <returns>No content</returns>
+            <response code="204">If the aircraft was successfully deleted</response>
+            <response code="401">If the user is not authenticated</response>
+            <response code="404">If the aircraft is not found</response>
+        </member>
+    </members>
+</doc>

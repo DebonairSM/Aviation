@@ -2,13 +2,13 @@
 	"info": {
 		"_postman_id": "a1b2c3d4-e5f6-g7h8-i9j0-k1l2m3n4o5p6",
 		"name": "Aircraft Service API",
-		"description": "Collection for testing the Aircraft Service API with Entra ID authentication",
+		"description": "Collection for testing the Aircraft Service API through the API Gateway with Entra ID authentication",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
 		{
 			"key": "baseUrl",
-			"value": "http://localhost:5001",
+			"value": "https://localhost:7500",
 			"type": "string"
 		},
 		{
@@ -58,7 +58,7 @@
 						},
 						{
 							"key": "scope",
-							"value": "api://e96126b4-d4f9-4716-adac-afa697eee97d/.default",
+							"value": "api://{{clientId}}/.default",
 							"type": "text"
 						}
 					]
@@ -79,6 +79,27 @@
 				"description": "Get access token for API authentication"
 			},
 			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Validate environment variables",
+							"if (!pm.environment.get('tenantId')) {",
+							"    console.error('tenantId is not set in environment');",
+							"    throw new Error('tenantId is not set in environment');",
+							"}",
+							"if (!pm.environment.get('clientId')) {",
+							"    console.error('clientId is not set in environment');",
+							"    throw new Error('clientId is not set in environment');",
+							"}",
+							"if (!pm.environment.get('clientSecret')) {",
+							"    console.error('clientSecret is not set in environment');",
+							"    throw new Error('clientSecret is not set in environment');",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
 				{
 					"listen": "test",
 					"script": {
@@ -126,16 +147,16 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/Aircraft",
+					"raw": "{{baseUrl}}/api/aircraft",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
-						"Aircraft"
+						"aircraft"
 					]
 				},
-				"description": "Get all aircraft (requires InternalUser role)"
+				"description": "Get all aircraft through the API Gateway"
 			},
 			"event": [
 				{
@@ -158,7 +179,7 @@
 							"                { key: \"grant_type\", value: \"client_credentials\" },",
 							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
 							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
-							"                { key: \"scope\", value: \"api://e96126b4-d4f9-4716-adac-afa697eee97d/.default\" }",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
 							"            ]",
 							"        }",
 							"    }, function (err, res) {",
@@ -194,17 +215,17 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/Aircraft/1",
+					"raw": "{{baseUrl}}/api/aircraft/1",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
-						"Aircraft",
+						"aircraft",
 						"1"
 					]
 				},
-				"description": "Get aircraft by ID (requires InternalUser role)"
+				"description": "Get aircraft by ID through the API Gateway"
 			},
 			"event": [
 				{
@@ -227,7 +248,7 @@
 							"                { key: \"grant_type\", value: \"client_credentials\" },",
 							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
 							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
-							"                { key: \"scope\", value: \"api://e96126b4-d4f9-4716-adac-afa697eee97d/.default\" }",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
 							"            ]",
 							"        }",
 							"    }, function (err, res) {",
@@ -272,16 +293,16 @@
 					"raw": "{\n    \"registration\": \"N12345\",\n    \"type\": \"Commercial\",\n    \"manufacturer\": \"Boeing\",\n    \"model\": \"737-800\",\n    \"yearOfManufacture\": 2020,\n    \"serialNumber\": \"12345\",\n    \"status\": \"Active\",\n    \"lastMaintenanceDate\": \"2024-01-01T00:00:00Z\",\n    \"nextMaintenanceDue\": \"2024-07-01T00:00:00Z\",\n    \"totalFlightHours\": 1000\n}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/api/Aircraft",
+					"raw": "{{baseUrl}}/api/aircraft",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
-						"Aircraft"
+						"aircraft"
 					]
 				},
-				"description": "Create new aircraft (requires Admin role)"
+				"description": "Create new aircraft through the API Gateway"
 			},
 			"event": [
 				{
@@ -304,7 +325,7 @@
 							"                { key: \"grant_type\", value: \"client_credentials\" },",
 							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
 							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
-							"                { key: \"scope\", value: \"api://e96126b4-d4f9-4716-adac-afa697eee97d/.default\" }",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
 							"            ]",
 							"        }",
 							"    }, function (err, res) {",
@@ -349,17 +370,17 @@
 					"raw": "{\n    \"id\": 1,\n    \"registration\": \"N12345\",\n    \"type\": \"Commercial\",\n    \"manufacturer\": \"Boeing\",\n    \"model\": \"737-800\",\n    \"yearOfManufacture\": 2020,\n    \"serialNumber\": \"12345\",\n    \"status\": \"Active\",\n    \"lastMaintenanceDate\": \"2024-01-01T00:00:00Z\",\n    \"nextMaintenanceDue\": \"2024-07-01T00:00:00Z\",\n    \"totalFlightHours\": 1000\n}"
 				},
 				"url": {
-					"raw": "{{baseUrl}}/api/Aircraft/1",
+					"raw": "{{baseUrl}}/api/aircraft/1",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
-						"Aircraft",
+						"aircraft",
 						"1"
 					]
 				},
-				"description": "Update existing aircraft (requires Admin role)"
+				"description": "Update existing aircraft through the API Gateway"
 			},
 			"event": [
 				{
@@ -382,7 +403,7 @@
 							"                { key: \"grant_type\", value: \"client_credentials\" },",
 							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
 							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
-							"                { key: \"scope\", value: \"api://e96126b4-d4f9-4716-adac-afa697eee97d/.default\" }",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
 							"            ]",
 							"        }",
 							"    }, function (err, res) {",
@@ -418,17 +439,17 @@
 					}
 				],
 				"url": {
-					"raw": "{{baseUrl}}/api/Aircraft/1",
+					"raw": "{{baseUrl}}/api/aircraft/1",
 					"host": [
 						"{{baseUrl}}"
 					],
 					"path": [
 						"api",
-						"Aircraft",
+						"aircraft",
 						"1"
 					]
 				},
-				"description": "Delete aircraft (requires Admin role)"
+				"description": "Delete aircraft through the API Gateway"
 			},
 			"event": [
 				{
@@ -451,7 +472,7 @@
 							"                { key: \"grant_type\", value: \"client_credentials\" },",
 							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
 							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
-							"                { key: \"scope\", value: \"api://e96126b4-d4f9-4716-adac-afa697eee97d/.default\" }",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
 							"            ]",
 							"        }",
 							"    }, function (err, res) {",

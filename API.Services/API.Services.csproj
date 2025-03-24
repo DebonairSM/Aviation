@@ -8,6 +8,9 @@
     <UserSecretsId>aircraft-service-secrets</UserSecretsId>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <DocumentationFile>$(AssemblyName).xml</DocumentationFile>
+    <OutputPath>bin\$(Configuration)\$(TargetFramework)\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,5 +31,9 @@
     <ProjectReference Include="..\Enterprise.Application\Enterprise.Application.csproj" />
     <ProjectReference Include="..\Enterprise.Infrastructure\Enterprise.Infrastructure.csproj" />
   </ItemGroup>
+
+  <Target Name="CopyDocumentationFile" AfterTargets="Build">
+    <Copy SourceFiles="$(DocumentationFile)" DestinationFolder="$(OutputPath)" />
+  </Target>
 
 </Project>
