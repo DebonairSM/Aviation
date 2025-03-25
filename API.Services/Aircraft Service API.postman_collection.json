@@ -1,0 +1,589 @@
+{
+	"info": {
+		"_postman_id": "cacad14f-78ba-4b31-aaba-e21588b762bb",
+		"name": "Aircraft Service API",
+		"description": "Collection for testing the Aircraft Service API through the API Gateway with Entra ID authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30065528"
+	},
+	"item": [
+		{
+			"name": "Get Access Token",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Validate environment variables",
+							"if (!pm.environment.get('tenantId')) {",
+							"    console.error('tenantId is not set in environment');",
+							"    throw new Error('tenantId is not set in environment');",
+							"}",
+							"if (!pm.environment.get('clientId')) {",
+							"    console.error('clientId is not set in environment');",
+							"    throw new Error('clientId is not set in environment');",
+							"}",
+							"if (!pm.environment.get('clientSecret')) {",
+							"    console.error('clientSecret is not set in environment');",
+							"    throw new Error('clientSecret is not set in environment');",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if the response is successful",
+							"if (pm.response.code === 200) {",
+							"    var jsonData = pm.response.json();",
+							"    ",
+							"    // Validate token response",
+							"    if (jsonData.access_token) {",
+							"        // Set the access token in environment",
+							"        pm.environment.set(\"access_token\", jsonData.access_token);",
+							"        ",
+							"        // Log success (only in development)",
+							"        console.log(\"Access token successfully set\");",
+							"        ",
+							"        // Optional: Set token expiration",
+							"        if (jsonData.expires_in) {",
+							"            var expiresIn = jsonData.expires_in;",
+							"            pm.environment.set(\"token_expires_at\", Date.now() + (expiresIn * 1000));",
+							"        }",
+							"    } else {",
+							"        console.error(\"No access token in response\");",
+							"        throw new Error(\"No access token in response\");",
+							"    }",
+							"} else {",
+							"    console.error(\"Failed to get access token: \" + pm.response.text());",
+							"    throw new Error(\"Failed to get access token\");",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "text"
+						},
+						{
+							"key": "client_id",
+							"value": "{{clientId}}",
+							"type": "text"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{clientSecret}}",
+							"type": "text"
+						},
+						{
+							"key": "scope",
+							"value": "api://{{clientId}}/.default",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://login.microsoftonline.com/{{tenantId}}/oauth2/v2.0/token",
+					"protocol": "https",
+					"host": [
+						"login",
+						"microsoftonline",
+						"com"
+					],
+					"path": [
+						"{{tenantId}}",
+						"oauth2",
+						"v2.0",
+						"token"
+					]
+				},
+				"description": "Get access token for API authentication"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Aircraft",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Check if token is expired",
+							"var tokenExpiresAt = pm.environment.get(\"token_expires_at\");",
+							"if (tokenExpiresAt && Date.now() >= tokenExpiresAt) {",
+							"    // Token is expired, get a new one",
+							"    pm.sendRequest({",
+							"        url: \"https://login.microsoftonline.com/\" + pm.environment.get(\"tenantId\") + \"/oauth2/v2.0/token\",",
+							"        method: \"POST\",",
+							"        header: {",
+							"            \"Content-Type\": \"application/x-www-form-urlencoded\"",
+							"        },",
+							"        body: {",
+							"            mode: \"urlencoded\",",
+							"            urlencoded: [",
+							"                { key: \"grant_type\", value: \"client_credentials\" },",
+							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
+							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
+							"            ]",
+							"        }",
+							"    }, function (err, res) {",
+							"        if (err) {",
+							"            console.error(\"Error refreshing token:\", err);",
+							"            return;",
+							"        }",
+							"        ",
+							"        var jsonData = res.json();",
+							"        if (jsonData.access_token) {",
+							"            pm.environment.set(\"access_token\", jsonData.access_token);",
+							"            if (jsonData.expires_in) {",
+							"                pm.environment.set(\"token_expires_at\", Date.now() + (jsonData.expires_in * 1000));",
+							"            }",
+							"        }",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsIng1dCI6IkpETmFfNGk0cjdGZ2lnTDNzSElsSTN4Vi1JVSIsImtpZCI6IkpETmFfNGk0cjdGZ2lnTDNzSElsSTN4Vi1JVSJ9.eyJhdWQiOiJhcGk6Ly9lOTYxMjZiNC1kNGY5LTQ3MTYtYWRhYy1hZmE2OTdlZWU5N2QiLCJpc3MiOiJodHRwczovL3N0cy53aW5kb3dzLm5ldC82MjFkYjc2Ni0xY2NkLTQwZjEtODBiMC1lZjQ2OWJkOGYwODEvIiwiaWF0IjoxNzQyODQ4NjEyLCJuYmYiOjE3NDI4NDg2MTIsImV4cCI6MTc0Mjg1MjUxMiwiYWlvIjoiazJSZ1lQaXN6UFIrSzM5Zjh2SDlXWWtpNGpibEFBPT0iLCJhcHBpZCI6ImU5NjEyNmI0LWQ0ZjktNDcxNi1hZGFjLWFmYTY5N2VlZTk3ZCIsImFwcGlkYWNyIjoiMSIsImlkcCI6Imh0dHBzOi8vc3RzLndpbmRvd3MubmV0LzYyMWRiNzY2LTFjY2QtNDBmMS04MGIwLWVmNDY5YmQ4ZjA4MS8iLCJvaWQiOiJjNGNjYWExNy05NTk5LTRiMTYtOTIwMy05MzUwMDAyMTg2MTciLCJyaCI6IjEuQWJjQVpyY2RZczBjOFVDQXNPOUdtOWp3Z2JRbVllbjUxQlpIcmF5dnBwZnU2WDNKQUFDM0FBLiIsInN1YiI6ImM0Y2NhYTE3LTk1OTktNGIxNi05MjAzLTkzNTAwMDIxODYxNyIsInRpZCI6IjYyMWRiNzY2LTFjY2QtNDBmMS04MGIwLWVmNDY5YmQ4ZjA4MSIsInV0aSI6IlVsMV81MklKNVUtS0ZwZG9zN2hQQUEiLCJ2ZXIiOiIxLjAifQ.X9hXKZ3q-Z1hOsRWk_sm1Qbk82HpuaYl5yTB5GzU1tXL35i9AsOJylQ7NVMXygIC11D7-FWpFzq0gsBojswzb0TihwJ3c1H6YhsYqDssEiJrGmgBwWYrTn4VWcwKBDzZGsn1vBcp4MmPCyejxy-rev7D2z-0Qijdl7vPjY_qjof_F9OVFqgQOcztzMKQfiKvfDafppMvOeRmffqCvxw7Hjxpk802k4BR3LnK7bVPMf7QaTKjmdJ9Zjzpb_YhxWU4WBm87wJ-LWZgQytPprH1-xIY7QI0XOGDpvmFcxHlgKmmZXh6azeF_kY922IFlq3h583qW-L8hr4CBpQP_r-Nxw",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/aircraft",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"aircraft"
+					]
+				},
+				"description": "Get all aircraft through the API Gateway"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Aircraft by ID",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Check if token is expired",
+							"var tokenExpiresAt = pm.environment.get(\"token_expires_at\");",
+							"if (tokenExpiresAt && Date.now() >= tokenExpiresAt) {",
+							"    // Token is expired, get a new one",
+							"    pm.sendRequest({",
+							"        url: \"https://login.microsoftonline.com/\" + pm.environment.get(\"tenantId\") + \"/oauth2/v2.0/token\",",
+							"        method: \"POST\",",
+							"        header: {",
+							"            \"Content-Type\": \"application/x-www-form-urlencoded\"",
+							"        },",
+							"        body: {",
+							"            mode: \"urlencoded\",",
+							"            urlencoded: [",
+							"                { key: \"grant_type\", value: \"client_credentials\" },",
+							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
+							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
+							"            ]",
+							"        }",
+							"    }, function (err, res) {",
+							"        if (err) {",
+							"            console.error(\"Error refreshing token:\", err);",
+							"            return;",
+							"        }",
+							"        ",
+							"        var jsonData = res.json();",
+							"        if (jsonData.access_token) {",
+							"            pm.environment.set(\"access_token\", jsonData.access_token);",
+							"            if (jsonData.expires_in) {",
+							"                pm.environment.set(\"token_expires_at\", Date.now() + (jsonData.expires_in * 1000));",
+							"            }",
+							"        }",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/aircraft/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"aircraft",
+						"1"
+					]
+				},
+				"description": "Get aircraft by ID through the API Gateway"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Aircraft",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Check if token is expired",
+							"var tokenExpiresAt = pm.environment.get(\"token_expires_at\");",
+							"if (tokenExpiresAt && Date.now() >= tokenExpiresAt) {",
+							"    // Token is expired, get a new one",
+							"    pm.sendRequest({",
+							"        url: \"https://login.microsoftonline.com/\" + pm.environment.get(\"tenantId\") + \"/oauth2/v2.0/token\",",
+							"        method: \"POST\",",
+							"        header: {",
+							"            \"Content-Type\": \"application/x-www-form-urlencoded\"",
+							"        },",
+							"        body: {",
+							"            mode: \"urlencoded\",",
+							"            urlencoded: [",
+							"                { key: \"grant_type\", value: \"client_credentials\" },",
+							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
+							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
+							"            ]",
+							"        }",
+							"    }, function (err, res) {",
+							"        if (err) {",
+							"            console.error(\"Error refreshing token:\", err);",
+							"            return;",
+							"        }",
+							"        ",
+							"        var jsonData = res.json();",
+							"        if (jsonData.access_token) {",
+							"            pm.environment.set(\"access_token\", jsonData.access_token);",
+							"            if (jsonData.expires_in) {",
+							"                pm.environment.set(\"token_expires_at\", Date.now() + (jsonData.expires_in * 1000));",
+							"            }",
+							"        }",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"registration\": \"N12345\",\n    \"type\": \"Commercial\",\n    \"manufacturer\": \"Boeing\",\n    \"model\": \"737-800\",\n    \"yearOfManufacture\": 2020,\n    \"serialNumber\": \"12345\",\n    \"status\": \"Active\",\n    \"lastMaintenanceDate\": \"2024-01-01T00:00:00Z\",\n    \"nextMaintenanceDue\": \"2024-07-01T00:00:00Z\",\n    \"totalFlightHours\": 1000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/aircraft",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"aircraft"
+					]
+				},
+				"description": "Create new aircraft through the API Gateway"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Aircraft",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Check if token is expired",
+							"var tokenExpiresAt = pm.environment.get(\"token_expires_at\");",
+							"if (tokenExpiresAt && Date.now() >= tokenExpiresAt) {",
+							"    // Token is expired, get a new one",
+							"    pm.sendRequest({",
+							"        url: \"https://login.microsoftonline.com/\" + pm.environment.get(\"tenantId\") + \"/oauth2/v2.0/token\",",
+							"        method: \"POST\",",
+							"        header: {",
+							"            \"Content-Type\": \"application/x-www-form-urlencoded\"",
+							"        },",
+							"        body: {",
+							"            mode: \"urlencoded\",",
+							"            urlencoded: [",
+							"                { key: \"grant_type\", value: \"client_credentials\" },",
+							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
+							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
+							"            ]",
+							"        }",
+							"    }, function (err, res) {",
+							"        if (err) {",
+							"            console.error(\"Error refreshing token:\", err);",
+							"            return;",
+							"        }",
+							"        ",
+							"        var jsonData = res.json();",
+							"        if (jsonData.access_token) {",
+							"            pm.environment.set(\"access_token\", jsonData.access_token);",
+							"            if (jsonData.expires_in) {",
+							"                pm.environment.set(\"token_expires_at\", Date.now() + (jsonData.expires_in * 1000));",
+							"            }",
+							"        }",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": 1,\n    \"registration\": \"N12345\",\n    \"type\": \"Commercial\",\n    \"manufacturer\": \"Boeing\",\n    \"model\": \"737-800\",\n    \"yearOfManufacture\": 2020,\n    \"serialNumber\": \"12345\",\n    \"status\": \"Active\",\n    \"lastMaintenanceDate\": \"2024-01-01T00:00:00Z\",\n    \"nextMaintenanceDue\": \"2024-07-01T00:00:00Z\",\n    \"totalFlightHours\": 1000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/aircraft/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"aircraft",
+						"1"
+					]
+				},
+				"description": "Update existing aircraft through the API Gateway"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Aircraft",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Check if token is expired",
+							"var tokenExpiresAt = pm.environment.get(\"token_expires_at\");",
+							"if (tokenExpiresAt && Date.now() >= tokenExpiresAt) {",
+							"    // Token is expired, get a new one",
+							"    pm.sendRequest({",
+							"        url: \"https://login.microsoftonline.com/\" + pm.environment.get(\"tenantId\") + \"/oauth2/v2.0/token\",",
+							"        method: \"POST\",",
+							"        header: {",
+							"            \"Content-Type\": \"application/x-www-form-urlencoded\"",
+							"        },",
+							"        body: {",
+							"            mode: \"urlencoded\",",
+							"            urlencoded: [",
+							"                { key: \"grant_type\", value: \"client_credentials\" },",
+							"                { key: \"client_id\", value: pm.environment.get(\"clientId\") },",
+							"                { key: \"client_secret\", value: pm.environment.get(\"clientSecret\") },",
+							"                { key: \"scope\", value: \"api://\" + pm.environment.get(\"clientId\") + \"/.default\" }",
+							"            ]",
+							"        }",
+							"    }, function (err, res) {",
+							"        if (err) {",
+							"            console.error(\"Error refreshing token:\", err);",
+							"            return;",
+							"        }",
+							"        ",
+							"        var jsonData = res.json();",
+							"        if (jsonData.access_token) {",
+							"            pm.environment.set(\"access_token\", jsonData.access_token);",
+							"            if (jsonData.expires_in) {",
+							"                pm.environment.set(\"token_expires_at\", Date.now() + (jsonData.expires_in * 1000));",
+							"            }",
+							"        }",
+							"    });",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{access_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/aircraft/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"aircraft",
+						"1"
+					]
+				},
+				"description": "Delete aircraft through the API Gateway"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "oauth2",
+		"oauth2": [
+			{
+				"key": "accessTokenUrl",
+				"value": "https://login.microsoftonline.com/{{tenantId}}/oauth2/v2.0/token",
+				"type": "string"
+			},
+			{
+				"key": "scope",
+				"value": "api://{{clientId}}/.default",
+				"type": "string"
+			},
+			{
+				"key": "clientSecret",
+				"value": "{{clientSecret}}",
+				"type": "string"
+			},
+			{
+				"key": "clientId",
+				"value": "{{clientId}}",
+				"type": "string"
+			},
+			{
+				"key": "grant_type",
+				"value": "client_credentials",
+				"type": "string"
+			},
+			{
+				"key": "tokenName",
+				"value": "ENTRAID",
+				"type": "string"
+			},
+			{
+				"key": "tokenType",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "accessToken",
+				"value": "",
+				"type": "string"
+			},
+			{
+				"key": "addTokenTo",
+				"value": "header",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "https://localhost:7500",
+			"type": "string"
+		},
+		{
+			"key": "tenantId",
+			"value": "621db766-1ccd-40f1-80b0-ef469bd8f081",
+			"type": "string"
+		},
+		{
+			"key": "clientId",
+			"value": "e96126b4-d4f9-4716-adac-afa697eee97d",
+			"type": "string"
+		},
+		{
+			"key": "clientSecret",
+			"value": "Q5.8Q~SOEG4f45FbnvUb3imQg4AMayr3iOZV3alr",
+			"type": "string"
+		}
+	]
+}
