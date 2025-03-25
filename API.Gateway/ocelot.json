@@ -19,7 +19,8 @@
         "X-Forwarded-For": "{RemoteIpAddress}",
         "X-Forwarded-Proto": "{Scheme}"
       },
-      "DangerousAcceptAnyServerCertificate": true
+      "DangerousAcceptAnyServerCertificate": true,
+      "SwaggerKey": "aircraft-service"
     },
     {
       "DownstreamPathTemplate": "/api/aircraft/{id}",
@@ -40,7 +41,8 @@
         "X-Forwarded-For": "{RemoteIpAddress}",
         "X-Forwarded-Proto": "{Scheme}"
       },
-      "DangerousAcceptAnyServerCertificate": true
+      "DangerousAcceptAnyServerCertificate": true,
+      "SwaggerKey": "aircraft-service"
     },
     {
       "DownstreamPathTemplate": "/swagger/v1/swagger.json",
@@ -51,7 +53,7 @@
           "Port": 5002
         }
       ],
-      "UpstreamPathTemplate": "/swagger/docs/v1/API.Services",
+      "UpstreamPathTemplate": "/swagger/docs/v1/aircraft-service",
       "UpstreamHttpMethod": [ "GET" ],
       "DangerousAcceptAnyServerCertificate": true
     },
@@ -74,11 +76,11 @@
   },
   "SwaggerEndPoints": [
     {
-      "Key": "API.Services",
-      "TransformByOcelotConfig": true,
+      "Key": "aircraft-service",
+      "TransformByOcelotConfig": false,
       "Config": [
         {
-          "Name": "API.Services",
+          "Name": "Aircraft Service API",
           "Version": "v1",
           "Url": "http://localhost:5002/swagger/v1/swagger.json"
         }

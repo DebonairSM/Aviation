@@ -5,6 +5,7 @@ using Ocelot.Middleware;
 using MMLib.SwaggerForOcelot.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using Newtonsoft.Json.Linq;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,14 +62,12 @@ builder.Services.AddCors(options =>
 // Configure Ocelot
 builder.Services.AddOcelot(builder.Configuration);
 
-// Configure Swagger
-builder.Services.AddSwaggerGen(c =>
-{
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "API Gateway", Version = "v1" });
-});
-
-// Configure Swagger for Ocelot
+// Configure Swagger for Ocelot - simplified
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
+
+// Add minimal Swagger configuration
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
@@ -76,7 +75,10 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerForOcelotUI(opt =>
+    {
+        opt.PathToSwaggerGenerator = "/swagger/docs";
+    });
 }
 
 // Add request header logging middleware
