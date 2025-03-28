@@ -12,7 +12,7 @@ param tenantId string
 param audience string
 
 @description('Azure AD instance')
-param azureAdInstance string = 'https://login.microsoftonline.com/'
+param azureAdInstance string = environment().authentication.loginEndpoint
 
 var tags = {
   Environment: environmentName
@@ -27,101 +27,35 @@ var gatewayAppName = 'api-gateway-aviation-${environmentName}'
 var aircraftServiceAppName = 'api-aircraft-aviation-${environmentName}'
 var keyVaultName = 'kv-aviation-bicep-${environmentName}'
 
-// Create Resource Group
+// Create Resource Group at subscription scope
 resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: resourceGroupName
   location: location
   tags: tags
-}
-
-// Deploy Key Vault
-module keyVault 'modules/keyvault.bicep' = {
-  name: 'keyVaultDeployment'
-  scope: resourceGroup
-  params: {
-    keyVaultName: keyVaultName
-    location: location
-    tags: tags
+  properties: {
+    managedBy: null
   }
 }
 
-// Deploy App Service Plan
-module appServicePlan 'modules/appserviceplan.bicep' = {
-  name: 'appServicePlanDeployment'
+// Deploy all other resources in the resource group
+module resources 'modules/resources.bicep' = {
+  name: 'resourcesDeployment'
   scope: resourceGroup
   params: {
+    location: location
+    tags: tags
     appServicePlanName: appServicePlanName
-    location: location
-    tags: tags
-  }
-}
-
-// Deploy API Gateway
-module gatewayApp 'modules/webapp.bicep' = {
-  name: 'gatewayAppDeployment'
-  scope: resourceGroup
-  params: {
-    appName: gatewayAppName
-    location: location
-    appServicePlanId: appServicePlan.outputs.appServicePlanId
-    tags: tags
-    appSettings: [
-      {
-        name: 'AzureAd:TenantId'
-        value: tenantId
-      }
-      {
-        name: 'AzureAd:Audience'
-        value: audience
-      }
-      {
-        name: 'AzureAd:Instance'
-        value: azureAdInstance
-      }
-      {
-        name: 'Services:AircraftService'
-        value: 'https://${aircraftServiceApp.outputs.appUrl}'
-      }
-    ]
-  }
-}
-
-// Deploy Aircraft Service
-module aircraftServiceApp 'modules/webapp.bicep' = {
-  name: 'aircraftServiceDeployment'
-  scope: resourceGroup
-  params: {
-    appName: aircraftServiceAppName
-    location: location
-    appServicePlanId: appServicePlan.outputs.appServicePlanId
-    tags: tags
-    appSettings: [
-      {
-        name: 'ConnectionStrings:DefaultConnection'
-        value: '@Microsoft.KeyVault(SecretUri=https://${keyVaultName}.vault.azure.net/secrets/DefaultConnection)'
-      }
-      {
-        name: 'MicrosoftEntraId:TenantId'
-        value: tenantId
-      }
-      {
-        name: 'MicrosoftEntraId:Audience'
-        value: audience
-      }
-      {
-        name: 'MicrosoftEntraId:Instance'
-        value: azureAdInstance
-      }
-      {
-        name: 'KeyVaultName'
-        value: keyVaultName
-      }
-    ]
+    gatewayAppName: gatewayAppName
+    aircraftServiceAppName: aircraftServiceAppName
+    keyVaultName: keyVaultName
+    tenantId: tenantId
+    audience: audience
+    azureAdInstance: azureAdInstance
   }
 }
 
 // Output important information
 output resourceGroupName string = resourceGroupName
-output gatewayUrl string = gatewayApp.outputs.appUrl
-output aircraftServiceUrl string = aircraftServiceApp.outputs.appUrl
+output gatewayUrl string = resources.outputs.gatewayUrl
+output aircraftServiceUrl string = resources.outputs.aircraftServiceUrl
 output keyVaultName string = keyVaultName 
