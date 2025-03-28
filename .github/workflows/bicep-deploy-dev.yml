@@ -3,7 +3,7 @@ name: Deploy Bicep Templates to Azure Dev
 on:
   push:
     branches:
-      - main
+      - master
   workflow_dispatch:
 
 env:
