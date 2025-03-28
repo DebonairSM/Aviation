@@ -1,0 +1,90 @@
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/aircraft",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "api-aircraft-aviation-dev.azurewebsites.net",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/aircraft",
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "AddHeadersToRequest": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Forwarded-Proto": "{Scheme}"
+      },
+      "DangerousAcceptAnyServerCertificate": false,
+      "SwaggerKey": "aircraft-service"
+    },
+    {
+      "DownstreamPathTemplate": "/api/aircraft/{id}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "api-aircraft-aviation-dev.azurewebsites.net",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/api/aircraft/{id}",
+      "UpstreamHttpMethod": [ "GET", "PUT", "DELETE" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer",
+        "AllowedScopes": []
+      },
+      "AddHeadersToRequest": {
+        "X-Forwarded-For": "{RemoteIpAddress}",
+        "X-Forwarded-Proto": "{Scheme}"
+      },
+      "DangerousAcceptAnyServerCertificate": false,
+      "SwaggerKey": "aircraft-service"
+    },
+    {
+      "DownstreamPathTemplate": "/swagger/v1/swagger.json",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "api-aircraft-aviation-dev.azurewebsites.net",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/swagger/docs/v1/aircraft-service",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DangerousAcceptAnyServerCertificate": false
+    },
+    {
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "https",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "api-aircraft-aviation-dev.azurewebsites.net",
+          "Port": 443
+        }
+      ],
+      "UpstreamPathTemplate": "/swagger/{everything}",
+      "UpstreamHttpMethod": [ "GET" ],
+      "DangerousAcceptAnyServerCertificate": false
+    }
+  ],
+  "GlobalConfiguration": {
+    "BaseUrl": "https://api-gateway-aviation-dev.azurewebsites.net"
+  },
+  "SwaggerEndPoints": [
+    {
+      "Key": "aircraft-service",
+      "TransformByOcelotConfig": false,
+      "Config": [
+        {
+          "Name": "Aircraft Service API",
+          "Version": "v1",
+          "Url": "https://api-aircraft-aviation-dev.azurewebsites.net/swagger/v1/swagger.json"
+        }
+      ]
+    }
+  ]
+} 
